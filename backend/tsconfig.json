@@ -25,5 +25,6 @@
       "@/modules": ["src/modules"],
       "@/modules/*": ["src/modules/*"]
     }
-  }
+  },
+  "exclude": ["frontend", "../frontend"]
 }
