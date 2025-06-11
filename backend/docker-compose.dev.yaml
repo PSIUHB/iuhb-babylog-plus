@@ -1,0 +1,64 @@
+# docker-compose.dev.yml
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile.dev
+    image: babylogplus-api:dev
+    container_name: babylogplus_api_dev
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_USERNAME=babylogplus
+      - DB_PASSWORD=babylogplus
+      - REDIS_HOST=redis
+      - JWT_SECRET=dev-secret-key-not-for-production
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/frontend
+      - ./.env:/app/.env
+    ports:
+      - "9229:9229"
+      - "3000:3000"
+    command: npm run start:dev
+    networks:
+      - babylogplus_network
+
+  postgres:
+    image: postgres:15
+    container_name: babylogplus_postgres_dev
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: babylogplus
+      POSTGRES_PASSWORD: babylogplus
+    networks:
+      - babylogplus_network
+
+  redis:
+    image: redis:7
+    container_name: babylogplus_redis_dev
+    ports:
+      - "6379:6379"
+    networks:
+      - babylogplus_network
+
+  # Additional development services
+  adminer:
+    image: adminer
+    platform: linux/amd64
+    container_name: babylogplus_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - babylogplus_network
+
+networks:
+  babylogplus_network:
+    driver: bridge
