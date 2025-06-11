@@ -54,6 +54,14 @@ import { HealthModule } from '@/modules/health/health.module';
     },{
       rootPath: join(__dirname, '..', 'frontend', 'dist'),
       serveRoot: '/',
+      exclude: ['/api*'],
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'frontend', 'dist'),
+      exclude: ['/api*', '/uploads*'],
     }),
     AuthModule,
     UsersModule,

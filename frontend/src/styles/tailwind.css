@@ -1,5 +1,60 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-    themes: light --default, dark --prefersdark;
-    prefix: "babylog-";
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+    name: "baby-light";
+    default: true;
+    prefersdark: false;
+    color-scheme: light;
+
+    /* Base colors - soft, gentle whites and creams */
+    --color-base-100: oklch(99% 0.01 40);        /* Very soft cream white */
+    --color-base-200: oklch(96% 0.02 40);        /* Light cream */
+    --color-base-300: oklch(93% 0.03 40);        /* Gentle beige */
+    --color-base-content: oklch(25% 0.04 280);   /* Deep purple-gray for text */
+
+    /* Primary - Soft baby pink */
+    --color-primary: oklch(80% 0.15 10);         /* Gentle baby pink */
+    --color-primary-content: oklch(98% 0.01 10); /* Near white for contrast */
+
+    /* Secondary - Soft baby blue */
+    --color-secondary: oklch(82% 0.12 240);      /* Gentle baby blue */
+    --color-secondary-content: oklch(98% 0.01 240); /* Near white for contrast */
+
+    /* Accent - Soft lavender */
+    --color-accent: oklch(85% 0.10 290);         /* Gentle lavender */
+    --color-accent-content: oklch(98% 0.01 290); /* Near white for contrast */
+
+    /* Neutral - Warm gray */
+    --color-neutral: oklch(65% 0.05 60);         /* Warm neutral gray */
+    --color-neutral-content: oklch(98% 0.01 60); /* Near white for contrast */
+
+    /* Info - Soft sky blue */
+    --color-info: oklch(78% 0.15 220);          /* Gentle sky blue */
+    --color-info-content: oklch(98% 0.01 220);  /* Near white for contrast */
+
+    /* Success - Soft mint green */
+    --color-success: oklch(82% 0.18 140);       /* Gentle mint green */
+    --color-success-content: oklch(98% 0.01 140); /* Near white for contrast */
+
+    /* Warning - Soft peach */
+    --color-warning: oklch(85% 0.15 70);        /* Gentle peach */
+    --color-warning-content: oklch(25% 0.05 70); /* Dark text for readability */
+
+    /* Error - Soft coral pink */
+    --color-error: oklch(78% 0.18 25);          /* Gentle coral pink */
+    --color-error-content: oklch(98% 0.01 25);  /* Near white for contrast */
+
+    /* Border radius - soft, rounded corners */
+    --radius-selector: 1.5rem;  /* Extra rounded for selectors */
+    --radius-field: 0.75rem;    /* Well-rounded fields */
+    --radius-box: 1rem;         /* Nicely rounded boxes */
+
+    /* Sizes - comfortable for baby apps */
+    --size-selector: 0.375rem;  /* Slightly larger selectors */
+    --size-field: 0.375rem;     /* Comfortable field sizing */
+
+    /* Border and effects */
+    --border: 1px;              /* Clean, thin borders */
+    --depth: 1;                 /* Subtle shadows for depth */
+    --noise: 0;                 /* Clean, noise-free appearance */
 }
