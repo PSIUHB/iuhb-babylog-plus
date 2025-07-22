@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Temperature, TemperatureUnit } from '../entities/temperature.entity';
@@ -14,6 +14,7 @@ export class TemperaturesService extends TrackableService<Temperature, CreateTem
     constructor(
         @InjectRepository(Temperature)
         private temperaturesRepository: Repository<Temperature>,
+        @Inject(forwardRef(() => ChildrenService))
         childrenService: ChildrenService,
         eventEmitter: EventEmitter2
     ) {

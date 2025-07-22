@@ -1,0 +1,124 @@
+.starry-night {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  overflow: hidden;
+  z-index: 1;
+  color: white;
+  border-color: transparent;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    background:
+            radial-gradient(2px 2px at 15% 20%, white, transparent),
+            radial-gradient(1px 1px at 80% 30%, white, transparent),
+            radial-gradient(3px 3px at 60% 15%, white, transparent),
+            radial-gradient(1px 1px at 25% 40%, white, transparent),
+            radial-gradient(2px 2px at 85% 10%, white, transparent),
+            radial-gradient(1px 1px at 70% 50%, white, transparent),
+            radial-gradient(2px 2px at 40% 60%, white, transparent),
+            radial-gradient(1px 1px at 45% 25%, white, transparent),
+            radial-gradient(3px 3px at 10% 35%, white, transparent),
+            radial-gradient(1px 1px at 20% 70%, white, transparent),
+            radial-gradient(2px 2px at 65% 80%, white, transparent),
+            radial-gradient(1px 1px at 90% 45%, white, transparent);
+    animation: twinkle 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 15%;
+    right: 15%;
+    width: 40px;
+    height: 40px;
+    background: #f8f8ff;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(248, 248, 255, 0.3);
+    animation: moonGlow 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .shooting-star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: shoot 8s linear infinite;
+    pointer-events: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, white, transparent);
+      animation: tail 8s linear infinite;
+    }
+
+    &:nth-child(1) {
+      top: 20%;
+      left: -10px;
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      top: 60%;
+      left: -10px;
+      animation-delay: 4s;
+    }
+  }
+
+  .birthday {
+    color: white;
+  }
+
+  .badge {
+    border-color: white;
+    color: white;
+    background: transparent;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes moonGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(248, 248, 255, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(248, 248, 255, 0.5); }
+}
+
+@keyframes shoot {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(100vw + 50px), 80px);
+    opacity: 0;
+  }
+}
+
+@keyframes tail {
+  0% { width: 0; }
+  30% { width: 40px; }
+  100% { width: 0; }
+}

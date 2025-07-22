@@ -3,28 +3,30 @@
 		class="card shadow-lg border"
 		:class="cardClasses"
 	>
-		<div class="card-body">
-			<div class="flex items-center gap-4 mb-4">
-				<div class="avatar">
-					<div
-						class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none"
-						:class="avatarClasses"
-					>
-						<span class="text-2xl font-bold flex items-center justify-center w-full h-full">{{ baby.initial }}</span>
-					</div>
+  	<div class="card-body">
+		<div class="flex items-center gap-4 mb-4">
+			<div class="avatar">
+				<div
+					class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none"
+					:class="avatarClasses"
+				>
+					<span class="text-2xl font-bold flex items-center justify-center w-full h-full">{{ baby.initial }}</span>
 				</div>
-				<div>
-					<h3 class="card-title" :class="titleClasses">{{ baby.name }}</h3>
-					<p class="text-sm text-base-content/60">Born: {{ baby.birthDate }}</p>
-				</div>
-    <div class="ml-auto flex items-center gap-2">
+			</div>
+			<div>
+				<h3 class="card-title" :class="titleClasses">
+					{{ baby.name }}
 					<div
 						class="badge"
 						:class="statusBadgeClasses"
 					>
-						{{ baby.status }}
+						{{ childStatus }}
 					</div>
-					<div class="dropdown dropdown-end">
+				</h3>
+				<p class="text-sm text-base-content/60 birthday">Born: {{ baby.birthDate }}</p>
+			</div>
+			 <div class="ml-auto flex items-center gap-2">
+					<div class="dropdown dropdown-end text-black">
 						<div tabindex="0" role="button" class="btn btn-ghost btn-sm">
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -67,7 +69,7 @@
 					class="btn btn-base btn-sm"
 					@click="openSleepModal"
 				>
-					{{ baby.statusType === 'sleeping' ? '⏰ Wake' : '💤 Sleep' }}
+					{{ childStatus === 'sleeping' ? '⏰ Wake' : '💤 Sleep' }}
 				</button>
 			</div>
 		</div>
@@ -85,6 +87,7 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
 import { TrackableType } from '@/enums/trackable-type.enum'
+import { useChildAutoUpdate } from '@/composables/useAutoUpdate'
 
 // Import trackable modal components
 import FeedModal from '@/components/trackables/FeedModal.vue'
@@ -98,6 +101,7 @@ import BathModal from '@/components/trackables/BathModal.vue'
 import feedsService from '@/services/feeds.service'
 import sleepsService from '@/services/sleeps.service'
 import diapersService from '@/services/diapers.service'
+import childrenService from '@/services/children.service'
 
 const props = defineProps({
 	baby: {
@@ -120,6 +124,16 @@ const bathModal = ref(null)
 const lastFeed = ref(null)
 const lastSleep = ref(null)
 const lastDiaper = ref(null)
+const childStatus = ref('awake') // Default status is awake
+
+// Setup automatic updates via WebSocket for trackable changes
+const { isUpdating, updateCount } = useChildAutoUpdate(
+  computed(() => props.baby?.id),
+  async () => {
+    console.log('Trackable data changed via WebSocket, refreshing...')
+    await fetchLatestTrackableData()
+  }
+)
 
 // Format time ago
 const formatTimeAgo = (timestamp) => {
@@ -138,10 +152,25 @@ const formatTimeAgo = (timestamp) => {
   }
 }
 
-// Fetch latest trackable data
-const fetchLatestTrackables = async () => {
+// Fetch child's current status
+const fetchChildStatus = async () => {
+  if (!props.baby?.id) return
+
   try {
-    // Fetch all feeds for the child
+    const response = await childrenService.getChildStatus(props.baby.id)
+    childStatus.value = response.status
+  } catch (error) {
+    console.error('Error fetching child status:', error)
+    childStatus.value = 'awake' // Default to awake if there's an error
+  }
+}
+
+// Fetch latest trackable data
+const fetchLatestTrackableData = async () => {
+  if (!props.baby?.id) return
+
+  try {
+    // Fetch latest feed
     const feeds = await feedsService.findAll(props.baby.id)
     if (feeds && feeds.length > 0) {
       // Sort by occurredAt in descending order
@@ -151,7 +180,7 @@ const fetchLatestTrackables = async () => {
       lastFeed.value = sortedFeeds[0]
     }
 
-    // Fetch all sleeps for the child
+    // Fetch latest sleep
     const sleeps = await sleepsService.findAll(props.baby.id)
     if (sleeps && sleeps.length > 0) {
       // Sort by occurredAt in descending order
@@ -161,7 +190,7 @@ const fetchLatestTrackables = async () => {
       lastSleep.value = sortedSleeps[0]
     }
 
-    // Fetch all diapers for the child
+    // Fetch latest diaper
     const diapers = await diapersService.findAll(props.baby.id)
     if (diapers && diapers.length > 0) {
       // Sort by occurredAt in descending order
@@ -170,9 +199,30 @@ const fetchLatestTrackables = async () => {
       )
       lastDiaper.value = sortedDiapers[0]
     }
+
+    // Also fetch the child's current status
+    await fetchChildStatus()
   } catch (error) {
     console.error('Error fetching trackable data:', error)
   }
+}
+
+// Watch for baby prop changes and refetch data
+watch(() => props.baby?.id, (newId) => {
+  if (newId) {
+    fetchLatestTrackableData()
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  fetchLatestTrackableData()
+})
+
+// Handle trackable creation (called by modals)
+const handleTrackableCreated = (trackable) => {
+  console.log('Trackable created locally, refreshing data...')
+  fetchLatestTrackableData()
+  emit('event-created', trackable)
 }
 
 // Quick actions data
@@ -193,34 +243,13 @@ const quickActions = ref([
 	},
 	{
 		id: 3,
-		icon: '💊',
-		label: 'Medicine',
-		action: 'medicine',
-		eventType: TrackableType.MEDICINE
-	},
-	{
-		id: 4,
 		icon: '⚖️',
 		label: 'Weight',
 		action: 'weight',
 		eventType: TrackableType.WEIGHT
 	},
 	{
-		id: 5,
-		icon: '🛁',
-		label: 'Bath',
-		action: 'bath',
-		eventType: TrackableType.ACTIVITY
-	},
-	{
-		id: 6,
-		icon: '🎵',
-		label: 'Tummy Time',
-		action: 'activity',
-		eventType: TrackableType.ACTIVITY
-	},
-	{
-		id: 7,
+		id: 4,
 		icon: '🏆',
 		label: 'Milestones',
 		action: 'milestones',
@@ -233,7 +262,38 @@ const openFeedModal = () => {
   feedModal.value?.openModal()
 }
 
-const openSleepModal = () => {
+const openSleepModal = async () => {
+  // If child is sleeping, we want to end the sleep
+  if (childStatus.value === 'sleeping') {
+    try {
+      // Fetch all sleep records to find the most recent START sleep
+      const sleeps = await sleepsService.findAll(props.baby.id)
+      if (sleeps && sleeps.length > 0) {
+        // Sort by occurredAt in descending order
+        const sortedSleeps = [...sleeps].sort((a, b) => 
+          new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        )
+        
+        // Find the most recent sleep with status START
+        const activeSleep = sortedSleeps.find(sleep => sleep.status === 'start')
+        
+        if (activeSleep) {
+          // Calculate duration in minutes from start time to now
+          const startTime = new Date(activeSleep.occurredAt)
+          const now = new Date()
+          const durationMinutes = Math.round((now - startTime) / (1000 * 60))
+          
+          // Open modal with END sleep preselected and duration prefilled
+          sleepModal.value?.openModal(null, true, durationMinutes)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching sleep data:', error)
+    }
+  }
+  
+  // Default behavior - open modal with default values
   sleepModal.value?.openModal()
 }
 
@@ -253,22 +313,6 @@ const openBathModal = () => {
   bathModal.value?.openModal()
 }
 
-// Handle trackable created event
-const handleTrackableCreated = (trackable) => {
-  emit('event-created', trackable)
-  // Refresh trackable data when a new one is created
-  fetchLatestTrackables()
-}
-
-// Fetch data when component is mounted
-onMounted(() => {
-  fetchLatestTrackables()
-})
-
-// Fetch data when baby id changes
-watch(() => props.baby.id, () => {
-  fetchLatestTrackables()
-})
 
 // Handle quick action selection
 const handleQuickAction = async (action) => {
@@ -318,9 +362,15 @@ const handleQuickAction = async (action) => {
 }
 
 const cardClasses = computed(() => {
-	return {
-		'bg-base-200 border-base-300': props.baby.gender === 'female',
-		'bg-secondary-content border-secondary': props.baby.gender === 'male'
+	if(childStatus.value === 'sleeping') {
+		return {
+			'starry-night': true
+		}
+	} else {
+		return {
+			'bg-base-200 border-base-300': props.baby.gender === 'female',
+			'bg-secondary-content border-secondary': props.baby.gender === 'male'
+		}
 	}
 })
 
@@ -339,10 +389,9 @@ const titleClasses = computed(() => {
 })
 
 const statusBadgeClasses = computed(() => {
-	const status = props.baby.statusType
 	return {
-		'badge-primary': status === 'awake',
-		'badge-accent': status === 'sleeping'
+		'badge-primary': childStatus.value === 'awake',
+		'badge-accent': childStatus.value === 'sleeping'
 	}
 })
 </script>

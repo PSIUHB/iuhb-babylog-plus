@@ -57,6 +57,7 @@ import diapersService from '@/services/diapers.service'
 import temperaturesService from '@/services/temperatures.service'
 import weightsService from '@/services/weights.service'
 import { TrackableType } from '@/enums/trackable-type.enum'
+import { useAutoUpdate } from '@/composables/useAutoUpdate'
 
 const stats = ref({
 	events: 0,
@@ -72,6 +73,15 @@ const error = ref(null)
 const familyStore = useFamilyStore()
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+
+// Setup automatic updates via WebSocket
+const { isUpdating: isAutoUpdating } = useAutoUpdate({
+  familyId: computed(() => currentFamilyId.value),
+  refreshFn: async () => {
+    console.log('Dashboard stats data changed via WebSocket, refreshing...')
+    await fetchStats()
+  }
+})
 
 // Fetch dashboard stats
 const fetchStats = async () => {

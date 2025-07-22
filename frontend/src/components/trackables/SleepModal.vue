@@ -113,7 +113,7 @@ const form = reactive({ ...defaultForm });
 const editMode = ref(false);
 const editId = ref(null);
 
-const openModal = (sleep = null) => {
+const openModal = (sleep = null, endSleep = false, durationMinutes = 0) => {
   resetForm();
   
   if (sleep) {
@@ -133,6 +133,12 @@ const openModal = (sleep = null) => {
     // Create mode
     editMode.value = false;
     editId.value = null;
+    
+    // If endSleep is true, preselect "End sleep" and prefill duration
+    if (endSleep) {
+      form.status = SleepStatus.END;
+      form.duration_minutes = durationMinutes;
+    }
   }
   
   modal.value.openModal();

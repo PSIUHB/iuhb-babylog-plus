@@ -10,6 +10,8 @@ import { FamiliesService } from '@/modules/families/families.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventsService } from '@/modules/events/events.service';
 import { EventType } from '@/interfaces/event.interface';
+import { SleepsService } from '@/modules/trackables/services/sleeps.service';
+import { SleepStatus } from '@/modules/trackables/entities/sleep.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -23,6 +25,8 @@ export class ChildrenService {
         private eventEmitter: EventEmitter2,
         @Inject(forwardRef(() => EventsService))
         private eventsService: EventsService,
+        @Inject(forwardRef(() => SleepsService))
+        private sleepsService: SleepsService,
     ) {}
 
     async create(createChildDto: CreateChildDto, user: User, familyId: string): Promise<Child> {
@@ -338,7 +342,16 @@ export class ChildrenService {
         const child = await this.findOne(id, user);
 
         child.avatarUrl = `/uploads/avatars/${file.filename}`;
-        return this.childRepository.save(child);
+        const updatedChild = await this.childRepository.save(child);
+        
+        // Emit event for avatar update
+        this.eventEmitter.emit('child.updated', {
+            child: updatedChild,
+            familyId: child.familyId,
+            userId: user.id,
+        });
+        
+        return updatedChild;
     }
 
     private async checkUserPermission(userId: string, child: Child): Promise<void> {
@@ -390,6 +403,35 @@ export class ChildrenService {
         }
 
         return measurements;
+    }
+
+    async getChildStatus(id: string, user: User): Promise<{ status: string }> {
+        // Validate access
+        await this.findOne(id, user);
+
+        // Get all sleep records for the child
+        const sleepRecords = await this.sleepsService.findAll(id, user);
+
+        // If there are no sleep records, the child is awake
+        if (!sleepRecords || sleepRecords.length === 0) {
+            return { status: 'awake' };
+        }
+
+        // Sort sleep records by occurredAt in descending order (most recent first)
+        const sortedSleepRecords = [...sleepRecords].sort((a, b) => 
+            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        );
+
+        // Get the most recent sleep record
+        const latestSleepRecord = sortedSleepRecords[0];
+
+        // If the most recent sleep record has status START, the child is sleeping
+        if (latestSleepRecord.status === SleepStatus.START) {
+            return { status: 'sleeping' };
+        }
+
+        // Otherwise, the child is awake
+        return { status: 'awake' };
     }
 
     async getChildStatistics(id: string, user: User): Promise<any> {

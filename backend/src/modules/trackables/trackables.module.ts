@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Feed } from './entities/feed.entity';
 import { Sleep } from './entities/sleep.entity';
@@ -19,7 +19,6 @@ import { TemperaturesController } from './controllers/temperatures.controller';
 import { WeightsController } from './controllers/weights.controller';
 import { BathsController } from './controllers/baths.controller';
 import { ChildrenModule } from '../children/children.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -31,8 +30,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       Weight,
       Bath
     ]),
-    ChildrenModule,
-    EventEmitterModule.forRoot()
+    forwardRef(() => ChildrenModule)
   ],
   controllers: [
     FeedsController,

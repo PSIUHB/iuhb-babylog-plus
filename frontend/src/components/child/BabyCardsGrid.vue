@@ -1,5 +1,11 @@
 <template>
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+		<div v-if="isUpdating" class="fixed top-4 right-4 alert alert-info shadow-lg z-50 w-auto">
+			<div>
+				<span class="loading loading-spinner loading-sm mr-2"></span>
+				<span>Updating baby data...</span>
+			</div>
+		</div>
 		<BabyCard
 			v-for="baby in babies"
 			:key="baby.id"
@@ -35,6 +41,7 @@ import sleepsService from '@/services/sleeps.service'
 import diapersService from '@/services/diapers.service'
 import temperaturesService from '@/services/temperatures.service'
 import weightsService from '@/services/weights.service'
+import { useAutoUpdate } from '@/composables/useAutoUpdate'
 
 const babies = ref([])
 const loading = ref(false)
@@ -112,6 +119,15 @@ const handleEventCreated = (event) => {
 }
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+
+// Setup automatic updates via WebSocket
+const { isUpdating } = useAutoUpdate({
+  familyId: computed(() => currentFamilyId.value),
+  refreshFn: async () => {
+    console.log('Baby cards data changed via WebSocket, refreshing...')
+    await fetchBabies()
+  }
+})
 
 // Format baby data for display
 const formatBabyData = (baby, events) => {

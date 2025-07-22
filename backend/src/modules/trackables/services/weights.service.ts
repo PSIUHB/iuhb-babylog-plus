@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Weight, WeightUnit } from '../entities/weight.entity';
@@ -14,6 +14,7 @@ export class WeightsService extends TrackableService<Weight, CreateWeightDto, Up
     constructor(
         @InjectRepository(Weight)
         private weightsRepository: Repository<Weight>,
+        @Inject(forwardRef(() => ChildrenService))
         childrenService: ChildrenService,
         eventEmitter: EventEmitter2
     ) {

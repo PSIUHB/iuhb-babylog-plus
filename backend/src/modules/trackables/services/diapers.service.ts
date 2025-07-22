@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Diaper, DiaperType } from '../entities/diaper.entity';
@@ -14,6 +14,7 @@ export class DiapersService extends TrackableService<Diaper, CreateDiaperDto, Up
     constructor(
         @InjectRepository(Diaper)
         private diapersRepository: Repository<Diaper>,
+        @Inject(forwardRef(() => ChildrenService))
         childrenService: ChildrenService,
         eventEmitter: EventEmitter2
     ) {

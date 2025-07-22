@@ -1,5 +1,3 @@
-import { ref } from 'vue';
-
 /**
  * Simple event bus for application-wide events
  */

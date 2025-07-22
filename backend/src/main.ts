@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
@@ -12,8 +13,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Enable Socket.IO
+  app.useWebSocketAdapter(new IoAdapter(app));
+
   // Security
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false, // Allow Socket.IO
+  }));
+
   app.enableCors({
     origin: configService.get('CORS_ORIGIN', 'http://localhost:5173'),
     credentials: true,
@@ -52,5 +59,6 @@ async function bootstrap() {
   const port = configService.get('PORT', 3000);
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`WebSocket server is running on: ws://localhost:${port}`);
 }
 bootstrap();

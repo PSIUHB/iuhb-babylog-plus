@@ -5,8 +5,9 @@
 					<h3 class="card-title">Sleep Patterns (24h)</h3>
 					<HelpButton @open-help-modal="openHelpModal" />
 				</div>
-					<div v-if="loading" class="flex justify-center items-center py-4">
+					<div v-if="loading || isUpdating" class="flex justify-center items-center py-4">
 						<span class="loading loading-spinner loading-md"></span>
+						<span v-if="isUpdating" class="ml-2 text-sm text-base-content/70">Updating...</span>
 					</div>
 					<div v-else-if="error" class="alert alert-error">
 						{{ error }}
@@ -91,6 +92,7 @@ import sleepsService from '@/services/sleeps.service'
 import { SleepStatus, SleepQuality } from '@/interfaces/trackable.interface'
 import HelpModal from '@/components/global/HelpModal.vue'
 import HelpButton from '@/components/global/HelpButton.vue'
+import { useAutoUpdate } from '@/composables/useAutoUpdate'
 
 const sleepData = ref([])
 const loading = ref(false)
@@ -108,6 +110,15 @@ const closeHelpModal = () => {
 }
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+
+// Setup automatic updates via WebSocket
+const { isUpdating } = useAutoUpdate({
+  familyId: computed(() => currentFamilyId.value),
+  refreshFn: async () => {
+    console.log('Sleep patterns data changed via WebSocket, refreshing...')
+    await fetchSleepData()
+  }
+})
 
 // Format minutes to hours and minutes
 const formatSleepDuration = (minutes) => {

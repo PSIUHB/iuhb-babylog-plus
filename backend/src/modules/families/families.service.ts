@@ -12,6 +12,7 @@ import { randomBytes } from 'crypto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FamilyRole } from '@/interfaces';
 import { EventsService } from '@/modules/events/events.service';
+import { Child } from '@/modules/children/entities/child.entity';
 
 @Injectable()
 export class FamiliesService {
@@ -44,6 +45,9 @@ export class FamiliesService {
             role: 'parent' as any,
             isPrimary: true,
         });
+
+        // Emit event for family creation
+        this.eventEmitter.emit('family.created', savedFamily);
 
         return savedFamily;
     }
@@ -86,7 +90,12 @@ export class FamiliesService {
         }
 
         Object.assign(family, updateFamilyDto);
-        return this.familyRepository.save(family);
+        const updatedFamily = await this.familyRepository.save(family);
+        
+        // Emit event for family update
+        this.eventEmitter.emit('family.updated', updatedFamily);
+        
+        return updatedFamily;
     }
 
     async inviteMember(familyId: string, inviteMemberDto: InviteMemberDto, userId: string): Promise<Invitation> {
@@ -158,11 +167,18 @@ export class FamiliesService {
             }
 
             // Add user to family
-            await this.userFamilyRepository.save({
+            const userFamily = await this.userFamilyRepository.save({
                 userId,
                 familyId: family.id,
                 role: FamilyRole.CAREGIVER,
                 isPrimary: false,
+            });
+
+            // Emit event for member joined
+            this.eventEmitter.emit('family.member.joined', {
+                familyId: family.id,
+                userId,
+                userFamily
             });
 
             return family;
@@ -192,11 +208,18 @@ export class FamiliesService {
             role = invitation.role as FamilyRole;
         }
 
-        await this.userFamilyRepository.save({
+        const userFamily = await this.userFamilyRepository.save({
             userId: userId,
             familyId: invitation.family.id,
             role,
             isPrimary: false,
+        });
+
+        // Emit event for member joined
+        this.eventEmitter.emit('family.member.joined', {
+            familyId: invitation.family.id,
+            userId,
+            userFamily
         });
 
         // Mark invitation as accepted
@@ -229,6 +252,13 @@ export class FamiliesService {
 
         userFamily.leftAt = new Date();
         await this.userFamilyRepository.save(userFamily);
+        
+        // Emit event for member left
+        this.eventEmitter.emit('family.member.left', {
+            familyId,
+            userId,
+            userFamily
+        });
     }
 
     async getUserFamilyRole(userId: string, familyId: string): Promise<UserFamily | null> {
@@ -570,7 +600,16 @@ export class FamiliesService {
 
         // Update the member's role
         memberToUpdate.role = updateData.role as FamilyRole;
-        return this.userFamilyRepository.save(memberToUpdate);
+        const updatedMember = await this.userFamilyRepository.save(memberToUpdate);
+        
+        // Emit event for member updated
+        this.eventEmitter.emit('family.member.updated', {
+            familyId,
+            userId: memberId,
+            userFamily: updatedMember
+        });
+        
+        return updatedMember;
     }
 
     async removeFamilyMember(
@@ -621,5 +660,32 @@ export class FamiliesService {
         // Mark as left
         memberToRemove.leftAt = new Date();
         await this.userFamilyRepository.save(memberToRemove);
+        
+        // Emit event for member removed
+        this.eventEmitter.emit('family.member.removed', {
+            familyId,
+            userId: memberId,
+            userFamily: memberToRemove
+        });
+    }
+    
+    /**
+     * Get the family ID for a child
+     * @param childId The ID of the child
+     * @returns The ID of the family the child belongs to
+     */
+    async getFamilyIdForChild(childId: string): Promise<string | null> {
+        try {
+            const childRepository = this.familyRepository.manager.getRepository(Child);
+            const child = await childRepository.findOne({
+                where: { id: childId },
+                select: ['familyId']
+            });
+
+            return child?.familyId || null;
+        } catch (error) {
+            console.error('Error getting family ID for child:', error);
+            return null;
+        }
     }
 }

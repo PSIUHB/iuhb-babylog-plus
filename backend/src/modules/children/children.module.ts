@@ -6,12 +6,14 @@ import { Child } from './entities/child.entity';
 import { UserChild } from './entities/user-child.entity';
 import { FamiliesModule } from '@/modules/families/families.module';
 import { EventsModule } from '@/modules/events/events.module';
+import { TrackablesModule } from '@/modules/trackables/trackables.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Child, UserChild]),
     forwardRef(() => FamiliesModule),
     forwardRef(() => EventsModule),
+    forwardRef(() => TrackablesModule),
   ],
   controllers: [ChildrenController],
   providers: [ChildrenService],

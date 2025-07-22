@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import childrenService from '@/services/children.service'
 import { useFamilyStore } from '@/stores/family.store'
 import feedsService from '@/services/feeds.service'
@@ -42,8 +42,7 @@ import diapersService from '@/services/diapers.service'
 import temperaturesService from '@/services/temperatures.service'
 import weightsService from '@/services/weights.service'
 import milestoneService from '@/services/milestones.service'
-import eventBus from '@/services/event-bus.service'
-import { EVENTS } from '@/constants/events'
+import { useAutoUpdate } from '@/composables/useAutoUpdate'
 
 const activities = ref([])
 const loading = ref(false)
@@ -52,6 +51,15 @@ const familyStore = useFamilyStore()
 const childrenMap = ref({})
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+
+// Setup automatic updates via WebSocket
+const { isUpdating: isAutoUpdating } = useAutoUpdate({
+  familyId: computed(() => currentFamilyId.value),
+  refreshFn: async () => {
+    console.log('Recent activity data changed via WebSocket, refreshing...')
+    await fetchActivities()
+  }
+})
 
 // Format time ago
 const formatTimeAgo = (timestamp) => {
@@ -274,34 +282,8 @@ const fetchActivities = async () => {
   }
 }
 
-// Setup event listeners for trackable changes
-const setupEventListeners = () => {
-  // Handler function for all trackable events
-  const handleTrackableEvent = () => {
-    fetchActivities()
-  }
-  
-  // Register event listeners
-  eventBus.on(EVENTS.TRACKABLE_CREATED, handleTrackableEvent)
-  eventBus.on(EVENTS.TRACKABLE_UPDATED, handleTrackableEvent)
-  eventBus.on(EVENTS.TRACKABLE_DELETED, handleTrackableEvent)
-  
-  // Return cleanup function
-  return () => {
-    eventBus.off(EVENTS.TRACKABLE_CREATED, handleTrackableEvent)
-    eventBus.off(EVENTS.TRACKABLE_UPDATED, handleTrackableEvent)
-    eventBus.off(EVENTS.TRACKABLE_DELETED, handleTrackableEvent)
-  }
-}
-
 onMounted(async () => {
   await fetchActivities()
-  
-  // Setup event listeners
-  const cleanup = setupEventListeners()
-  
-  // Clean up event listeners when component is unmounted
-  onBeforeUnmount(cleanup)
 })
 </script>
 

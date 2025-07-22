@@ -7,7 +7,6 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { ChildrenService } from '@/modules/children/children.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { WebSocketGateway } from '@/modules/websocket/websocket.gateway';
 import { CreateMilestoneEventDto } from './dto/create-milestone-event.dto';
 import { MilestoneCategory } from '@/interfaces/milestone.interface';
 import { MilestonesService } from '@/modules/milestones/milestones.service';
@@ -20,7 +19,6 @@ export class EventsService {
         @Inject(forwardRef(() => ChildrenService))
         private childrenService: ChildrenService,
         private eventEmitter: EventEmitter2,
-        private wsGateway: WebSocketGateway,
         private milestonesService: MilestonesService,
     ) {}
 
@@ -45,7 +43,9 @@ export class EventsService {
 
             // Emit event for real-time updates
             const child = await this.childrenService.findOne(childId, user);
-            this.wsGateway.sendEventToFamily(child.familyId, 'event.created', {
+
+            // Emit event for WebSocket gateway to handle
+            this.eventEmitter.emit('event.created', {
                 event: savedEvent,
                 child,
                 user: { id: user.id, firstName: user.firstName, lastName: user.lastName },
@@ -236,10 +236,13 @@ export class EventsService {
 
         // Emit event for real-time updates
         const child = await this.childrenService.findOne(createMilestoneEventDto.childId, user);
-        this.wsGateway.sendEventToFamily(child.familyId, 'event.milestone.created', {
+
+        // Emit event for WebSocket gateway to handle
+        this.eventEmitter.emit('event.milestone.created', {
             event: savedEvent,
             child,
             user: { id: user.id, firstName: user.firstName, lastName: user.lastName },
+            milestone: milestone
         });
 
         return savedEvent;
@@ -374,10 +377,14 @@ export class EventsService {
 
         // Emit event for real-time updates
         const child = await this.childrenService.findOne(event.childId, user);
-        this.wsGateway.sendEventToFamily(child.familyId, 'event.milestone.deleted', {
+
+        // Emit event for WebSocket gateway to handle
+        this.eventEmitter.emit('event.milestone.deleted', {
             eventId,
+            childId: event.childId,
             child,
             user: { id: user.id, firstName: user.firstName, lastName: user.lastName },
+            milestone: event.data
         });
     }
 }

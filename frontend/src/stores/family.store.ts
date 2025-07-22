@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import familiesService from '../services/families.service';
+import websocketService from '../services/websocket.service';
 import { useAuthStore } from './auth.store';
 
 interface FamilyState {
@@ -191,9 +192,182 @@ export const useFamilyStore = defineStore('family', {
     async init() {
       try {
         await this.fetchFamilies();
+        
+        // Connect to WebSocket and set up event handlers
+        await this.setupWebSocketConnection();
       } catch (error) {
         console.error('Error initializing family store:', error);
         // Error is already handled in fetchFamilies, no need to do anything here
+      }
+    },
+    
+    // Set up WebSocket connection and event handlers
+    async setupWebSocketConnection() {
+      try {
+        // Connect to WebSocket server
+        await websocketService.connect();
+        
+        // Set up event handlers for family events
+        websocketService.on('family.updated', this.handleFamilyUpdated.bind(this));
+        websocketService.on('family.member.joined', this.handleFamilyMemberJoined.bind(this));
+        websocketService.on('family.member.left', this.handleFamilyMemberLeft.bind(this));
+        websocketService.on('family.member.updated', this.handleFamilyMemberUpdated.bind(this));
+        websocketService.on('family.member.removed', this.handleFamilyMemberRemoved.bind(this));
+        
+        // Set up event handlers for child events
+        websocketService.on('child.created', this.handleChildCreated.bind(this));
+        websocketService.on('child.updated', this.handleChildUpdated.bind(this));
+        
+        // Set up event handlers for trackable events
+        websocketService.on('trackable.created', this.handleTrackableCreated.bind(this));
+        websocketService.on('trackable.updated', this.handleTrackableUpdated.bind(this));
+        websocketService.on('trackable.deleted', this.handleTrackableDeleted.bind(this));
+        
+        // Set up event handlers for event events
+        websocketService.on('event.created', this.handleEventCreated.bind(this));
+        websocketService.on('event.milestone.deleted', this.handleEventMilestoneDeleted.bind(this));
+        
+        console.log('WebSocket event handlers set up');
+      } catch (error) {
+        console.error('Error setting up WebSocket connection:', error);
+      }
+    },
+    
+    // Handle family updated event
+    async handleFamilyUpdated(data: any) {
+      console.log('Family updated event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+      
+      // Refresh the families list
+      await this.fetchFamilies();
+    },
+    
+    // Handle family member joined event
+    async handleFamilyMemberJoined(data: any) {
+      console.log('Family member joined event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle family member left event
+    async handleFamilyMemberLeft(data: any) {
+      console.log('Family member left event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle family member updated event
+    async handleFamilyMemberUpdated(data: any) {
+      console.log('Family member updated event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle family member removed event
+    async handleFamilyMemberRemoved(data: any) {
+      console.log('Family member removed event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle child created event
+    async handleChildCreated(data: any) {
+      console.log('Child created event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle child updated event
+    async handleChildUpdated(data: any) {
+      console.log('Child updated event received:', data);
+      
+      // If this is the current family, refresh it
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        await this.fetchFamily(data.familyId);
+      }
+    },
+    
+    // Handle trackable created event
+    async handleTrackableCreated(data: any) {
+      console.log('Trackable created event received:', data);
+      
+      // If this is the current family and we have the child in the current family, refresh the family
+      if (this.currentFamily) {
+        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        if (childInFamily) {
+          await this.fetchFamily(this.currentFamily.id);
+        }
+      }
+    },
+    
+    // Handle trackable updated event
+    async handleTrackableUpdated(data: any) {
+      console.log('Trackable updated event received:', data);
+      
+      // If this is the current family and we have the child in the current family, refresh the family
+      if (this.currentFamily) {
+        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        if (childInFamily) {
+          await this.fetchFamily(this.currentFamily.id);
+        }
+      }
+    },
+    
+    // Handle trackable deleted event
+    async handleTrackableDeleted(data: any) {
+      console.log('Trackable deleted event received:', data);
+      
+      // If this is the current family and we have the child in the current family, refresh the family
+      if (this.currentFamily) {
+        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        if (childInFamily) {
+          await this.fetchFamily(this.currentFamily.id);
+        }
+      }
+    },
+    
+    // Handle event created event
+    async handleEventCreated(data: any) {
+      console.log('Event created event received:', data);
+      
+      // If this is the current family and we have the child in the current family, refresh the family
+      if (this.currentFamily) {
+        const childInFamily = this.currentFamily.children?.some(child => child.id === data.child.id);
+        if (childInFamily) {
+          await this.fetchFamily(this.currentFamily.id);
+        }
+      }
+    },
+    
+    // Handle event milestone deleted event
+    async handleEventMilestoneDeleted(data: any) {
+      console.log('Event milestone deleted event received:', data);
+      
+      // If this is the current family and we have the child in the current family, refresh the family
+      if (this.currentFamily) {
+        const childInFamily = this.currentFamily.children?.some(child => child.id === data.child.id);
+        if (childInFamily) {
+          await this.fetchFamily(this.currentFamily.id);
+        }
       }
     }
   }

@@ -84,4 +84,13 @@ export class ChildrenController {
     ) {
         return this.childrenService.getChildStatistics(id, user);
     }
+
+    @Get(':id/status')
+    @ApiOperation({ summary: 'Get child current status (sleeping/awake)' })
+    getChildStatus(
+        @Param('id') id: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.childrenService.getChildStatus(id, user);
+    }
 }

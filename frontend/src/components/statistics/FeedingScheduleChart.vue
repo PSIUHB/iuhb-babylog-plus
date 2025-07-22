@@ -5,8 +5,9 @@
    				<h3 class="card-title">Today's Feeding Schedule</h3>
 				<HelpButton @open-help-modal="openHelpModal" />
    			</div>
-			<div v-if="loading" class="flex justify-center items-center py-4">
+			<div v-if="loading || isUpdating" class="flex justify-center items-center py-4">
 				<span class="loading loading-spinner loading-md"></span>
+				<span v-if="isUpdating" class="ml-2 text-sm text-base-content/70">Updating...</span>
 			</div>
 			<div v-else-if="error" class="alert alert-error">
 				{{ error }}
@@ -60,6 +61,7 @@ import feedsService from '@/services/feeds.service'
 import { TrackableType } from '@/enums/trackable-type.enum'
 import HelpModal from '@/components/global/HelpModal.vue'
 import HelpButton from '@/components/global/HelpButton.vue'
+import { useAutoUpdate } from '@/composables/useAutoUpdate'
 
 const feedingData = ref([])
 const loading = ref(false)
@@ -77,6 +79,15 @@ const closeHelpModal = () => {
 }
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+
+// Setup automatic updates via WebSocket
+const { isUpdating } = useAutoUpdate({
+  familyId: computed(() => currentFamilyId.value),
+  refreshFn: async () => {
+    console.log('Feeding schedule data changed via WebSocket, refreshing...')
+    await fetchFeedingData()
+  }
+})
 
 // Format time until next feeding
 const formatTimeUntilNextFeeding = (lastFeedingTime) => {

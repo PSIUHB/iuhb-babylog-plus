@@ -58,6 +58,13 @@ class ChildrenService implements IChildrenService {
       return response.json();
     });
   }
+
+  /**
+   * Get child's current status (sleeping/awake)
+   */
+  async getChildStatus(childId: string): Promise<{ status: string }> {
+    return api.get(`/children/${childId}/status`);
+  }
 }
 
 export default new ChildrenService();
