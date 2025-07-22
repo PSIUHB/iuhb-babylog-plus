@@ -23,6 +23,7 @@ services:
     volumes:
       - ./data/uploads:/app/uploads
       - ./logs/api:/app/logs
+      # shared directory is now inside backend directory, no additional mount needed
     depends_on:
       postgres:
         condition: service_healthy

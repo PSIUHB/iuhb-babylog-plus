@@ -1,24 +1,48 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.store';
+import { useFamilyStore } from '@/stores/family.store';
 
 const email = ref('');
 const password = ref('');
+const errorMessage = ref('');
 const router = useRouter();
+const authStore = useAuthStore();
+const familyStore = useFamilyStore();
 
 const login = async () => {
   try {
-    // Here you would typically make an API call to authenticate the user
-    // For now, we'll just simulate a successful login
-    console.log('Logging in with:', { email: email.value, password: password.value });
+    // Reset error message
+    errorMessage.value = '';
 
-    // Set authentication state
-    localStorage.setItem('isAuthenticated', 'true');
+    // Use the auth store to login
+    await authStore.login({
+      email: email.value,
+      password: password.value
+    });
 
-    // Redirect to the app after successful login
-    router.push('/app');
+    // Check if the user's account is active
+    // Only show the not activated message if isActive is explicitly set to false
+    if (authStore.user && authStore.user.isActive === false) {
+      errorMessage.value = 'Your account is not activated. Please check your email for the activation link.';
+      authStore.logout();
+      return;
+    }
+
+    // Fetch families to check if user has any
+    await familyStore.fetchFamilies();
+
+    // If user doesn't have a family, redirect to create family page
+    if (!familyStore.currentFamily) {
+      router.push('/create-family');
+    } else {
+      // Otherwise, redirect to the app
+      router.push('/app');
+    }
   } catch (error) {
     console.error('Login failed:', error);
+    errorMessage.value = error instanceof Error ? error.message : 'Login failed. Please try again.';
   }
 };
 </script>
@@ -26,6 +50,9 @@ const login = async () => {
 <template>
   <div class="login-page">
     <h1>Login</h1>
+    <div v-if="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
     <form @submit.prevent="login" class="login-form">
       <div class="form-group">
         <label for="email">Email</label>
@@ -35,6 +62,7 @@ const login = async () => {
           type="email" 
           required 
           placeholder="Enter your email"
+          :disabled="authStore.loading"
         />
       </div>
       <div class="form-group">
@@ -45,9 +73,12 @@ const login = async () => {
           type="password" 
           required 
           placeholder="Enter your password"
+          :disabled="authStore.loading"
         />
       </div>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn btn-primary" :disabled="authStore.loading">
+        {{ authStore.loading ? 'Logging in...' : 'Login' }}
+      </button>
     </form>
     <div class="links">
       <p>Don't have an account? <router-link to="/auth/register">Register</router-link></p>
@@ -71,6 +102,17 @@ h1 {
   margin-bottom: 2rem;
 }
 
+.error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
 .login-form {
   width: 100%;
   max-width: 400px;
@@ -91,9 +133,19 @@ input {
   border-radius: 4px;
 }
 
+input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
 button {
   margin-top: 1rem;
   padding: 0.75rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .links {

@@ -1,41 +1,8 @@
 import api from './api';
+import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile } from '@/interfaces/auth.interface';
+import type { IAuthService } from '@/interfaces';
 
-// Define types for request and response data
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string;
-  locale?: string;
-  timezone?: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-}
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string;
-}
-
-class AuthService {
+class AuthService implements IAuthService {
   /**
    * Register a new user
    */
@@ -83,6 +50,20 @@ class AuthService {
    */
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  /**
+   * Activate a user account with the given token
+   */
+  async activateAccount(token: string): Promise<any> {
+    return api.get(`/auth/activate?token=${token}`);
+  }
+
+  /**
+   * Get pending invitations for the current user
+   */
+  async getPendingInvitations(): Promise<any[]> {
+    return api.get('/families/invitation');
   }
 }
 

@@ -45,13 +45,13 @@
     --color-error-content: oklch(98% 0.01 25);  /* Near white for contrast */
 
     /* Border radius - soft, rounded corners */
-    --radius-selector: 1.5rem;  /* Extra rounded for selectors */
-    --radius-field: 0.75rem;    /* Well-rounded fields */
-    --radius-box: 1rem;         /* Nicely rounded boxes */
+    --radius-selector: 0.4rem;  /* Extra rounded for selectors */
+    --radius-field: 0.4rem;    /* Well-rounded fields */
+    --radius-box: .25rem;         /* Nicely rounded boxes */
 
     /* Sizes - comfortable for baby apps */
-    --size-selector: 0.375rem;  /* Slightly larger selectors */
-    --size-field: 0.375rem;     /* Comfortable field sizing */
+    --size-selector: 0.25rem;  /* Slightly larger selectors */
+    --size-field: 0.25rem;     /* Comfortable field sizing */
 
     /* Border and effects */
     --border: 1px;              /* Clean, thin borders */

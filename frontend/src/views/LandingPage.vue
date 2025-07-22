@@ -15,63 +15,22 @@
 						<li><a href="#pricing" class="text-base-content/70 hover:text-primary">Pricing</a></li>
 					</ul>
 				</div>
-				<button class="btn btn-primary btn-sm ml-2">Get Started</button>
+				<router-link to="/auth/register">
+					<button class="btn btn-primary btn-sm ml-2">Get started</button>
+				</router-link>
 			</div>
 		</div>
 
 		<!-- Hero Section -->
-		<div class="hero bg-gradient-to-br from-primary/5 to-secondary/5 min-h-[85vh]">
+		<div class="hero bg-gradient-to-br from-accent/5 to-primary/5 min-h-[85vh]">
 			<div class="hero-content flex-col lg:flex-row-reverse max-w-6xl mx-auto px-4">
 				<div class="flex-1 flex justify-center">
 					<div class="relative">
 						<!-- Mock Phone Interface -->
-						<div class="mockup-phone bg-primary/10 border-primary">
-							<div class="camera bg-primary"></div>
-							<div class="display">
-								<div class="artboard artboard-demo phone-1 bg-base-100">
-									<div class="p-4 space-y-3">
-										<div class="flex justify-between items-center">
-											<h3 class="font-bold text-sm">Today's Care</h3>
-											<div class="badge badge-primary badge-sm">Live</div>
-										</div>
-
-										<!-- Twin Cards -->
-										<div class="space-y-2">
-											<div class="card card-compact bg-primary/10 border border-primary/20">
-												<div class="card-body">
-													<div class="flex items-center gap-2">
-														<div class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold">
-															A
-														</div>
-														<div class="flex-1">
-															<div class="text-xs font-semibold">Anna</div>
-															<div class="text-xs text-base-content/60">Last fed: 2h ago</div>
-														</div>
-													</div>
-												</div>
-											</div>
-
-											<div class="card card-compact bg-secondary/10 border border-secondary/20">
-												<div class="card-body">
-													<div class="flex items-center gap-2">
-														<div class="w-8 h-8 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xs font-bold">
-															B
-														</div>
-														<div class="flex-1">
-															<div class="text-xs font-semibold">Ben</div>
-															<div class="text-xs text-base-content/60">Last fed: 1h ago</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-
-										<div class="flex gap-2">
-											<button class="btn btn-primary btn-xs flex-1">🍼 Feed</button>
-											<button class="btn btn-secondary btn-xs flex-1">💤 Sleep</button>
-										</div>
-									</div>
-								</div>
+						<div class="mockup-phone">
+							<div class="mockup-phone-camera"></div>
+							<div class="mockup-phone-display text-white grid place-content-center">
+								App Screenshot
 							</div>
 						</div>
 					</div>
@@ -79,16 +38,20 @@
 
 				<div class="flex-1 text-center lg:text-left">
 					<h1 class="text-4xl lg:text-6xl font-bold text-base-content">
-						Care Coordination for
-						<span class="text-primary block">Multiple Babies</span>
+						Take care of your
+						<span class="text-primary block transition-opacity duration-500"
+							  v-for="(babyType, index) in babyTypes"
+							  :key="index"
+							  v-show="index === currentIndex">
+							{{ babyType }}
+						</span>
 					</h1>
 					<p class="py-6 text-lg text-base-content/70 max-w-xl">
-						The digital care documentation app designed specifically for parents of twins, triplets, and higher-order multiples.
-						Keep your entire family coordinated with real-time sync and intuitive tracking.
+						BabyLog+ transforms those overwhelming "who needs what when" moments into organized confidence, keeping every caregiver connected and every precious milestone captured in real-time.
 					</p>
 					<div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-						<router-link to="/auth/register" class="btn btn-primary btn-lg">
-							Get started for free
+						<router-link to="/auth/register">
+							<button class="btn btn-primary btn-lg">Get started for free</button>
 						</router-link>
 					</div>
 				</div>
@@ -100,10 +63,10 @@
 			<div class="max-w-6xl mx-auto px-4">
 				<div class="text-center mb-16">
 					<h2 class="text-4xl font-bold text-base-content mb-4">
-						Built for Multiple Baby Families
+						Built for your <span class="text-primary">baby</span>
 					</h2>
 					<p class="text-lg text-base-content/70 max-w-2xl mx-auto">
-						Every feature is designed with the unique challenges of caring for multiple babies in mind.
+						Every feature is designed with the unique challenges of caring for one or even more babies in mind.
 					</p>
 				</div>
 
@@ -128,7 +91,7 @@
 			<div class="max-w-6xl mx-auto px-4">
 				<div class="text-center mb-16">
 					<h2 class="text-4xl font-bold text-base-content mb-4">
-						Simple Steps to Better Care
+						It's just that <span class="text-primary">simple</span>
 					</h2>
 					<p class="text-lg text-base-content/70">
 						Get started in minutes with our intuitive setup process
@@ -142,7 +105,7 @@
 						class="step step-primary"
 						:data-content="index + 1"
 					>
-						<div class="text-left">
+						<div class="text-center">
 							<h3 class="font-bold text-lg">{{ step.title }}</h3>
 							<p class="text-base-content/70">{{ step.description }}</p>
 						</div>
@@ -156,10 +119,10 @@
 			<div class="max-w-6xl mx-auto px-4">
 				<div class="text-center mb-16">
 					<h2 class="text-4xl font-bold text-base-content mb-4">
-						Loved by Families Worldwide
+						Loved worldwide
 					</h2>
 					<p class="text-lg text-base-content/70">
-						See what other parents of multiples are saying about BabyLog+
+						See what other parents and caretaker are thinking about BabyLog+
 					</p>
 				</div>
 
@@ -172,7 +135,7 @@
 						<div class="card-body">
 							<div class="flex items-center gap-4 mb-4">
 								<div class="avatar placeholder">
-									<div class="bg-neutral text-neutral-content rounded-full w-12">
+									<div class="bg-neutral text-neutral-content rounded-full w-12 text-center">
 										<span class="text-xl">{{ testimonial.avatar }}</span>
 									</div>
 								</div>
@@ -202,21 +165,23 @@
 			<div class="max-w-4xl mx-auto px-4">
 				<div class="text-center mb-16">
 					<h2 class="text-4xl font-bold text-base-content mb-4">
-						Simple, Fair Pricing
+						Fair Pricing
 					</h2>
 					<p class="text-lg text-base-content/70">
-						Choose the plan that works best for your family
+						Choose the plan that works best for you and your family
 					</p>
 				</div>
 
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
 					<div class="card bg-base-100 shadow-lg border border-base-300">
 						<div class="card-body">
-							<h3 class="card-title text-2xl">Free Plan</h3>
+							<h3 class="card-title mt-5 text-2xl">
+								Free Plan
+							</h3>
 							<div class="text-4xl font-bold text-primary my-4">
-								€0<span class="text-lg font-normal text-base-content/60">/month</span>
+								€ 0<span class="text-lg font-normal text-base-content/60"> per month</span>
 							</div>
-							<ul class="space-y-3">
+							<ul class="space-y-3 mb-5">
 								<li class="flex items-center gap-2">
 									<svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -233,10 +198,10 @@
 									<svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
 									</svg>
-									Up to 2 caregivers
+									Up to 1 caregiver
 								</li>
 							</ul>
-							<div class="card-actions justify-end mt-6">
+							<div class="card-actions justify-end mt-auto">
 								<button class="btn btn-outline btn-block">Get Started Free</button>
 							</div>
 						</div>
@@ -247,11 +212,13 @@
 							Most Popular
 						</div>
 						<div class="card-body">
-							<h3 class="card-title text-2xl">Premium Plan</h3>
+							<h3 class="card-title mt-5 text-2xl">
+								Premium Plan
+							</h3>
 							<div class="text-4xl font-bold text-primary my-4">
-								€9.99<span class="text-lg font-normal text-base-content/60">/month</span>
+								€ 9.99<span class="text-lg font-normal text-base-content/60"> per month</span>
 							</div>
-							<ul class="space-y-3">
+							<ul class="space-y-3 mb-5">
 								<li class="flex items-center gap-2">
 									<svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -276,14 +243,8 @@
 									</svg>
 									Export data for doctors
 								</li>
-								<li class="flex items-center gap-2">
-									<svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-									</svg>
-									Priority support
-								</li>
 							</ul>
-							<div class="card-actions justify-end mt-6">
+							<div class="card-actions justify-end mt-auto">
 								<button class="btn btn-primary btn-block">Start Free Trial</button>
 							</div>
 						</div>
@@ -296,20 +257,14 @@
 		<div class="py-20 bg-gradient-to-r from-primary to-secondary text-primary-content">
 			<div class="max-w-4xl mx-auto px-4 text-center">
 				<h2 class="text-4xl font-bold mb-6">
-					Ready to Simplify Your Multiple Baby Care?
+					Ready to simplify your Baby Care?
 				</h2>
 				<p class="text-xl mb-8 opacity-90">
-					Join thousands of families who trust BabyLog+ to keep their babies healthy and happy.
+					Join our big community of families who trust in BabyLog+ to keep their babies healthy and happy.
 				</p>
 				<div class="flex flex-col sm:flex-row gap-4 justify-center">
 					<button class="btn btn-accent btn-lg">
-						Start Your Free Trial
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-						</svg>
-					</button>
-					<button class="btn btn-outline btn-lg border-white text-white hover:bg-white hover:text-primary">
-						Schedule Demo Call
+						Get started for free
 					</button>
 				</div>
 			</div>
@@ -318,11 +273,15 @@
 		<!-- Footer -->
 		<footer class="footer footer-center bg-base-200 text-base-content p-10">
 			<aside>
-				<div class="text-2xl font-bold text-primary mb-4">👶 BabyLog+</div>
+				<div class="text-2xl font-bold text-primary mb-4">
+					<img class="babylog-logo" src="./../assets/images/logo/babylogplus.png" alt="BabyLog+ Logo">
+				</div>
 				<p class="font-bold">
-					Digital Care Documentation for Multiple Baby Families
+					Digital Care  For Your Baby
 				</p>
-				<p>Made with ❤️ for parents of twins, triplets, and more</p>
+				<p>
+					Made with ❤️ by<br>a loving twin father
+				</p>
 			</aside>
 			<nav>
 				<div class="grid grid-flow-col gap-4">
@@ -333,23 +292,32 @@
 				</div>
 			</nav>
 			<div class="text-sm text-base-content/60">
-				© 2025 BabyLog+ - All rights reserved
+				© {{ new Date().getFullYear() }} BabyLog+ - All rights reserved
 			</div>
 		</footer>
 	</div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-// Reactive data
-const isMenuOpen = ref(false)
+const babyTypes = ['Baby', 'Twins', 'Triplets', 'Quadruplets']
+const currentIndex = ref(0)
+let intervalId = null
 
-const stats = [
-	{ title: 'Active Families', value: '2,400+', desc: 'Trust BabyLog+' },
-	{ title: 'Babies Tracked', value: '4,800+', desc: 'Around the world' },
-	{ title: 'Care Events', value: '1.2M+', desc: 'Logged daily' }
-]
+const cycleText = () => {
+	currentIndex.value = (currentIndex.value + 1) % babyTypes.length
+}
+
+onMounted(() => {
+	intervalId = setInterval(cycleText, 1500)
+})
+
+onUnmounted(() => {
+	if (intervalId) {
+		clearInterval(intervalId)
+	}
+})
 
 const features = [
 	{
@@ -425,15 +393,5 @@ const testimonials = [
 ]
 </script>
 
-<style scoped>
-/* Custom styles can be added here if needed */
-.mockup-phone {
-	transform: scale(0.8);
-}
-
-@media (min-width: 1024px) {
-	.mockup-phone {
-		transform: scale(1);
-	}
-}
+<style>
 </style>

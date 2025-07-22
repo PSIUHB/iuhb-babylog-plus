@@ -9,7 +9,9 @@ import { LoginDto } from '@/modules/auth/dto/login.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(
+        private authService: AuthService
+    ) {}
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
@@ -31,4 +33,5 @@ export class AuthController {
     getProfile(@Request() req) {
         return req.user;
     }
+
 }

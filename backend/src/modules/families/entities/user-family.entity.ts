@@ -2,13 +2,8 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { Family } from '@/modules/families/entities/family.entity';
-
-export enum FamilyRole {
-	ADMIN = 'admin',
-	PARENT = 'parent',
-	CAREGIVER = 'caregiver',
-	VIEWER = 'viewer'
-}
+import { FamilyRole } from '@/interfaces/caregiver.interface';
+export { FamilyRole };
 
 @Entity('user_families')
 export class UserFamily extends BaseEntity {

@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } f
 import { User } from '@/modules/users/entities/user.entity';
 import { Family } from '@/modules/families/entities/family.entity';
 
-@Entity('invitations')
+@Entity('invitation')
 export class Invitation {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -12,6 +12,9 @@ export class Invitation {
 
     @Column({ nullable: true })
     role?: string;
+
+    @Column({ nullable: true })
+    message?: string;
 
     @ManyToOne(() => Family, (family) => family.invitations, { onDelete: 'CASCADE' })
     family: Family;
@@ -25,13 +28,12 @@ export class Invitation {
     @Column({ nullable: false, unique: true })
     token: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamp' })
     expiresAt: Date;
 
-    @CreateDateColumn()
-    acceptedAt: Date;
+    @Column({ type: 'timestamp', nullable: true })
+    acceptedAt: Date | null;
 }
-

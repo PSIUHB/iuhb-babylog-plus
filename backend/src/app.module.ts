@@ -19,6 +19,8 @@ import { MediaModule } from '@/modules/media/media.module';
 import { WebSocketModule } from '@/modules/websocket/websocket.module';
 import { MailModule } from '@/modules/mail/mail.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { MilestonesModule } from '@/modules/milestones/milestones.module';
+import { TrackablesModule } from '@/modules/trackables/trackables.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { HealthModule } from '@/modules/health/health.module';
     WebSocketModule,
     MailModule,
     HealthModule,
+    MilestonesModule,
+    TrackablesModule,
   ],
 })
 export class AppModule {}

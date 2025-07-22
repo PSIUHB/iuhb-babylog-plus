@@ -16,6 +16,9 @@ RUN npm ci
 # Copy source code
 COPY backend/ .
 
+# Copy shared directory (now inside backend)
+# This line is no longer needed as shared is already inside backend
+
 # Build application
 RUN npm run build
 

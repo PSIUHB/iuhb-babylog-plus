@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { WebSocketGateway } from './websocket.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,7 +14,7 @@ import { FamiliesModule } from '@/modules/families/families.module';
                 signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') },
             }),
         }),
-        FamiliesModule,
+        forwardRef(() => FamiliesModule),
     ],
     providers: [WebSocketGateway],
     exports: [WebSocketGateway],

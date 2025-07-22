@@ -23,7 +23,9 @@
       "@/config": ["src/config"],
       "@/config/*": ["src/config/*"],
       "@/modules": ["src/modules"],
-      "@/modules/*": ["src/modules/*"]
+      "@/modules/*": ["src/modules/*"],
+      "@/interfaces": ["src/interfaces"],
+      "@/interfaces/*": ["src/interfaces/*"]
     }
   },
   "exclude": ["frontend", "../frontend"]

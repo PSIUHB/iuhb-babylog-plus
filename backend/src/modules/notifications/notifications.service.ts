@@ -1,4 +1,3 @@
-// src/modules/notifications/notifications.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -58,7 +57,7 @@ export class NotificationsService {
 
     async markAsRead(id: string, userId: string): Promise<Notification> {
         const notification = await this.notificationRepository.findOne({
-            where: { id: Number(id), user: { id: userId } },
+            where: { id, user: { id: userId } },
             relations: ['user'],
         });
         if (!notification) {
@@ -81,9 +80,9 @@ export class NotificationsService {
         }
     }
 
-    async findOne(id: number | string): Promise<Notification | null> {
+    async findOne(id: string): Promise<Notification | null> {
         return this.notificationRepository.findOne({
-            where: { id: Number(id) },
+            where: { id },
             relations: ['user'],
         });
     }

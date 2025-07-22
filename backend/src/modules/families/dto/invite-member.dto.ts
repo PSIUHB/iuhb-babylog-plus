@@ -10,5 +10,9 @@ export class InviteMemberDto {
   @IsOptional()
   @IsString()
   role?: string;
-}
 
+  @ApiProperty({ example: 'Please join our family!', required: false })
+  @IsOptional()
+  @IsString()
+  message?: string;
+}

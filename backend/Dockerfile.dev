@@ -19,6 +19,8 @@ RUN npm ci
 # Copy source code (will be overridden by volume mount)
 COPY backend/ .
 
+# Note: shared directory is now inside backend directory
+
 # Copy frontend dist files
 COPY frontend/dist ./frontend/dist
 

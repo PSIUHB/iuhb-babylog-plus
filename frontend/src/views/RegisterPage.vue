@@ -9,13 +9,15 @@ const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const errorMessage = ref('');
+const successMessage = ref('');
 const isLoading = ref(false);
 const router = useRouter();
 
 const register = async () => {
   try {
-    // Reset error message
+    // Reset messages
     errorMessage.value = '';
+    successMessage.value = '';
 
     // Validate passwords match
     if (password.value !== confirmPassword.value) {
@@ -40,8 +42,15 @@ const register = async () => {
       password: password.value
     });
 
-    // Registration successful, redirect to login page
-    router.push('/auth/login');
+    // Clear form
+    firstName.value = '';
+    lastName.value = '';
+    email.value = '';
+    password.value = '';
+    confirmPassword.value = '';
+
+    // Show success message
+    successMessage.value = 'Registration successful! Please check your email for an activation link.';
   } catch (error) {
     // Handle registration error
     console.error('Registration failed:', error);
@@ -57,6 +66,9 @@ const register = async () => {
     <h1>Register</h1>
     <div v-if="errorMessage" class="error-message">
       {{ errorMessage }}
+    </div>
+    <div v-if="successMessage" class="success-message">
+      {{ successMessage }}
     </div>
     <form @submit.prevent="register" class="register-form">
       <div class="form-group">
@@ -152,6 +164,18 @@ h1 {
   background-color: #fee2e2;
   color: #b91c1c;
   border: 1px solid #f87171;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.success-message {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
   border-radius: 4px;
   text-align: center;
 }

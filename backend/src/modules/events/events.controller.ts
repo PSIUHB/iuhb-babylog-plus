@@ -1,8 +1,8 @@
-// src/modules/events/events.controller.ts
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { CreateMilestoneEventDto } from './dto/create-milestone-event.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
@@ -47,5 +47,41 @@ export class EventsController {
         @CurrentUser() user: User,
     ) {
         return this.eventsService.getStatistics(childId, user);
+    }
+
+    @Post('milestone')
+    @ApiOperation({ summary: 'Create a milestone event for a child' })
+    createMilestoneEvent(
+        @Body() createMilestoneEventDto: CreateMilestoneEventDto,
+        @CurrentUser() user: User,
+    ) {
+        return this.eventsService.createMilestoneEvent(createMilestoneEventDto, user);
+    }
+
+    @Get('milestone/child/:childId')
+    @ApiOperation({ summary: 'Get milestone events for a specific child' })
+    getMilestoneEvents(
+        @Param('childId') childId: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.eventsService.getMilestoneEvents(childId, user);
+    }
+
+    @Get('milestone/status/child/:childId')
+    @ApiOperation({ summary: 'Get all milestones with their achievement status for a child' })
+    getChildMilestones(
+        @Param('childId') childId: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.eventsService.getChildMilestones(childId, user);
+    }
+
+    @Delete('milestone/:eventId')
+    @ApiOperation({ summary: 'Delete a milestone event' })
+    deleteMilestoneEvent(
+        @Param('eventId') eventId: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.eventsService.deleteMilestoneEvent(eventId, user);
     }
 }

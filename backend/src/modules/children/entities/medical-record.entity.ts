@@ -3,10 +3,9 @@ import { Child } from '@/modules/children/entities/child.entity';
 
 @Entity()
 export class MedicalRecord {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Child, child => child.medicalRecords)
   child: Child;
 }
-

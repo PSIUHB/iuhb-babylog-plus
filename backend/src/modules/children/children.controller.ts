@@ -75,4 +75,13 @@ export class ChildrenController {
     ) {
         return this.childrenService.uploadAvatar(id, file, user);
     }
+
+    @Get(':id/statistics')
+    @ApiOperation({ summary: 'Get child statistics' })
+    getChildStatistics(
+        @Param('id') id: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.childrenService.getChildStatistics(id, user);
+    }
 }

@@ -9,7 +9,7 @@ import {
     MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { FamiliesService } from '@/modules/families/families.service';
 
@@ -27,6 +27,7 @@ export class WebSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     constructor(
         private jwtService: JwtService,
+        @Inject(forwardRef(() => FamiliesService))
         private familiesService: FamiliesService,
     ) {}
 

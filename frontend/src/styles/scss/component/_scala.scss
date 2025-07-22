@@ -1,0 +1,91 @@
+// SCSS Variables
+$scala-width: 200px;
+$scala-height: 16px;
+$scala-border-radius: 8px;
+$scala-margin: 0 10px;
+
+// Modern Colors
+$scala-bg: #f5f5f5;
+$scala-range-green: #22c55e;
+$scala-range-yellow: #eab308;
+$scala-range-red: #ef4444;
+$scala-target: #ffffff;
+$scala-current: #1f2937;
+
+// Marker Settings
+$scala-marker-width: 2px;
+$scala-marker-radius: 1px;
+
+// Text Settings
+$text-color: #666;
+$text-size-small: 12px;
+$text-size-normal: 16px;
+$text-margin: 20px 0;
+$values-margin: 0 0 0 10px;
+
+// Status Colors
+$scala-status-green: $scala-range-green;
+$scala-status-yellow: $scala-range-yellow;
+$scala-status-red: $scala-range-red;
+
+.scala {
+  display: inline-block;
+  width: $scala-width;
+  height: $scala-height;
+  background: $scala-bg;
+  border-radius: $scala-border-radius;
+  position: relative;
+  margin: $scala-margin;
+  vertical-align: middle;
+  overflow: hidden;
+
+  // Status-basierte Range-Farben
+  &-green .scala-range {
+    background: $scala-status-green;
+  }
+
+  &-yellow .scala-range {
+    background: $scala-status-yellow;
+  }
+
+  &-red .scala-range {
+    background: $scala-status-red;
+  }
+
+  &-range {
+    position: absolute;
+    height: 100%;
+    background: $scala-range-green;
+    border-radius: inherit;
+  }
+
+  &-target {
+    position: absolute;
+    width: $scala-marker-width;
+    height: 100%;
+    background: $scala-target;
+    border-radius: $scala-marker-radius;
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+  }
+
+  &-current {
+    position: absolute;
+    width: $scala-marker-width;
+    height: 100%;
+    background: $scala-current;
+    border-radius: $scala-marker-radius;
+    transform: translateX(-50%);
+  }
+}
+
+.demo-text {
+  margin: $text-margin;
+  font-size: $text-size-normal;
+}
+
+.values {
+  font-size: $text-size-small;
+  color: $text-color;
+  margin: $values-margin;
+}

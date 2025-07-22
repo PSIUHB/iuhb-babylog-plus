@@ -1,9 +1,12 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateChildDto } from './create-child.dto';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDate, IsEnum, IsBoolean } from 'class-validator';
+import { Type } from 'class-transformer';
+import { Gender } from '@/interfaces/child.interface';
 
 export class UpdateChildDto extends PartialType(CreateChildDto) {
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
+  // Explicitly exclude id from being updated
+  @IsOptional()
+  @IsString()
+  readonly id?: never;
 }

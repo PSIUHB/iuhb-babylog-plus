@@ -1,16 +1,13 @@
 import {Entity, PrimaryGeneratedColumn, ManyToOne, Column} from 'typeorm';
 import { User } from '@/modules/users/entities/user.entity';
 import { Child } from '@/modules/children/entities/child.entity';
-
-export enum ChildPermission {
-  WRITE = 'write',
-  READ = 'view'
-}
+import { ChildPermission } from '@/interfaces/child.interface';
+export { ChildPermission };
 
 @Entity()
 export class UserChild {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   userId: string;
@@ -31,4 +28,3 @@ export class UserChild {
   @ManyToOne(() => Child, child => child.userChildren)
   child: Child;
 }
-

@@ -2,18 +2,8 @@ import { Entity, Column, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm
 import { BaseEntity } from '@/common/entities/base.entity';
 import { Child } from '@/modules/children/entities/child.entity';
 import { User } from '@/modules/users/entities/user.entity';
-
-export enum EventType {
-    FEEDING = 'feeding',
-    DIAPER = 'diaper',
-    SLEEP = 'sleep',
-    MEDICINE = 'medicine',
-    TEMPERATURE = 'temperature',
-    WEIGHT = 'weight',
-    HEIGHT = 'height',
-    ACTIVITY = 'activity',
-    NOTE = 'note'
-}
+import { EventType } from '@/interfaces/event.interface';
+export { EventType };
 
 @Entity('events')
 export class Event extends BaseEntity {
