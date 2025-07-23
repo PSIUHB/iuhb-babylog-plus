@@ -6,85 +6,56 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Feeding Method</span>
-        </label>
-        <select v-model="form.method" class="select select-bordered w-full">
-          <option :value="FeedingMethod.BREAST">Breast</option>
-          <option :value="FeedingMethod.BOTTLE">Bottle</option>
-          <option :value="FeedingMethod.SOLID">Solid Food</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.method"
+        label="Feeding Method"
+        :options="feedingMethodOptions"
+      />
 
-      <div v-if="form.method === FeedingMethod.BREAST" class="form-control">
-        <label class="label">
-          <span class="label-text">Side</span>
-        </label>
-        <select v-model="form.side" class="select select-bordered w-full">
-          <option :value="BreastSide.LEFT">Left</option>
-          <option :value="BreastSide.RIGHT">Right</option>
-          <option :value="BreastSide.BOTH">Both</option>
-        </select>
-      </div>
+      <SelectInput
+        v-if="form.method === FeedingMethod.BREAST"
+        v-model="form.side"
+        label="Side"
+        :options="breastSideOptions"
+      />
 
-      <div v-if="form.method === FeedingMethod.BOTTLE" class="form-control">
-        <label class="label">
-          <span class="label-text">Amount (ml)</span>
-        </label>
-        <input
-          type="number"
+      <div v-if="form.method === FeedingMethod.BOTTLE">
+        <TextInput
           v-model.number="form.amount_ml"
-          class="input input-bordered w-full"
+          type="number"
+          label="Amount (ml)"
           min="0"
         />
       </div>
 
-      <div v-if="form.method === FeedingMethod.SOLID" class="form-control">
-        <label class="label">
-          <span class="label-text">Food Type</span>
-        </label>
-        <input
-          type="text"
+      <div v-if="form.method === FeedingMethod.SOLID">
+        <TextInput
           v-model="form.food_type"
-          class="input input-bordered w-full"
+          label="Food Type"
           placeholder="e.g., Puree, Cereal, Fruit"
         />
       </div>
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Duration (minutes)</span>
-        </label>
-        <input
-          type="number"
-          v-model.number="form.duration_minutes"
-          class="input input-bordered w-full"
-          min="0"
-        />
-      </div>
+      <TextInput
+        v-model.number="form.duration_minutes"
+        type="number"
+        label="Duration (minutes)"
+        min="0"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -97,6 +68,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
+import SelectInput from '@/components/ui/SelectInput.vue';
 import feedsService from '@/services/feeds.service';
 import { FeedingMethod, BreastSide } from '@/interfaces/trackable.interface';
 
@@ -111,6 +84,19 @@ const emit = defineEmits(['created', 'updated']);
 
 const modal = ref(null);
 const error = ref('');
+
+// Options for select inputs
+const feedingMethodOptions = [
+  { value: FeedingMethod.BREAST, label: 'Breast' },
+  { value: FeedingMethod.BOTTLE, label: 'Bottle' },
+  { value: FeedingMethod.SOLID, label: 'Solid Food' }
+];
+
+const breastSideOptions = [
+  { value: BreastSide.LEFT, label: 'Left' },
+  { value: BreastSide.RIGHT, label: 'Right' },
+  { value: BreastSide.BOTH, label: 'Both' }
+];
 
 const defaultForm = {
   childId: props.childId,

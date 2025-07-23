@@ -83,32 +83,29 @@
         <h3 class="font-bold text-lg mb-4">Record Milestone</h3>
         
         <form @submit.prevent="saveMilestone">
-          <div class="form-control mb-4">
-            <label class="label">
-              <span class="label-text font-medium">Milestone</span>
-            </label>
-            <input type="text" v-model="selectedMilestone.milestone" class="input input-bordered" disabled />
-          </div>
+          <TextInput
+            v-model="selectedMilestone.milestone"
+            label="Milestone"
+            disabled
+            class="mb-4"
+          />
           
-          <div class="form-control mb-4">
-            <label class="label">
-              <span class="label-text font-medium">Date Achieved</span>
-            </label>
-            <input 
-              type="date" 
-              v-model="achievedDate" 
-              class="input input-bordered" 
-              required
-              :max="today"
-            />
-          </div>
+          <TextInput
+            v-model="achievedDate"
+            type="date"
+            label="Date Achieved"
+            required
+            :max="today"
+            class="mb-4"
+          />
           
-          <div class="form-control mb-6">
-            <label class="label">
-              <span class="label-text font-medium">Notes (optional)</span>
-            </label>
-            <textarea v-model="notes" class="textarea textarea-bordered" placeholder="Add any notes about this milestone"></textarea>
-          </div>
+          <TextInput
+            v-model="notes"
+            type="textarea"
+            label="Notes (optional)"
+            placeholder="Add any notes about this milestone"
+            class="mb-6"
+          />
           
           <div class="modal-action">
             <button type="button" class="btn" @click="closeMilestoneModal">Cancel</button>
@@ -133,6 +130,7 @@ import { MilestoneCategory } from '@/interfaces/milestone.interface';
 import type { Child } from '@/interfaces/child.interface';
 import { format, differenceInMonths } from 'date-fns';
 import ScalaComponent from "@/components/statistics/ScalaComponent.vue";
+import TextInput from '@/components/ui/TextInput.vue';
 
 const props = defineProps({
   childId: {

@@ -161,12 +161,18 @@ export class ChildrenService {
         console.log('Existing birthWeightKg:', child.birthWeightKg);
         console.log('Existing birthHeightCm:', child.birthHeightCm);
 
-        // Check write permission
+        // Check if user has permission in family
+        const userFamily = await this.familiesService.getUserFamilyRole(user.id, child.familyId);
+        const hasRolePermission = userFamily && ['admin', 'parent'].includes(userFamily.role);
+        
+        // Check direct write permission
         const userChild = await this.userChildRepository.findOne({
             where: { userId: user.id, childId: id },
         });
-
-        if (!userChild || userChild.permission !== ChildPermission.WRITE) {
+        const hasDirectPermission = userChild && userChild.permission === ChildPermission.WRITE;
+        
+        // Allow update if user has either role permission or direct permission
+        if (!hasRolePermission && !hasDirectPermission) {
             throw new ForbiddenException('Insufficient permissions to update child');
         }
         

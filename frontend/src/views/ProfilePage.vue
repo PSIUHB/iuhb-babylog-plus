@@ -14,22 +14,54 @@
 						<ProfileOverview @avatar-updated="handleAvatarUpdate" />
 					</div>
 
-					<!-- Main Settings -->
-					<div class="lg:col-span-2 space-y-6">
-						<!-- Personal Information -->
-						<PersonalInformation @profile-updated="handleProfileUpdate" />
+					<!-- Main Settings with Tabs -->
+					<div class="lg:col-span-2">
+						<div class="card bg-base-100 shadow-lg">
+							<div class="card-body p-0">
+								<!-- Tabs Navigation -->
+								<div class="tabs tabs-boxed bg-base-200 rounded-t-lg">
+									<a 
+										class="tab tab-lg flex-1" 
+										:class="{ 'tab-active': activeTab === 'personal' }"
+										@click="activeTab = 'personal'"
+									>
+										Personal Info
+									</a>
+									<a 
+										class="tab tab-lg flex-1" 
+										:class="{ 'tab-active': activeTab === 'account' }"
+										@click="activeTab = 'account'"
+									>
+										Account
+									</a>
+									<a 
+										class="tab tab-lg flex-1" 
+										:class="{ 'tab-active': activeTab === 'security' }"
+										@click="activeTab = 'security'"
+									>
+										Security
+									</a>
+								</div>
 
-						<!-- Account Settings -->
-						<AccountSettings @settings-updated="handleSettingsUpdate" />
+								<!-- Tab Content -->
+								<div class="p-6">
+									<!-- Personal Information Tab -->
+									<div v-if="activeTab === 'personal'">
+										<PersonalInformation @profile-updated="handleProfileUpdate" />
+									</div>
 
-						<!-- Notification Preferences -->
-						<NotificationPreferences @preferences-updated="handleNotificationUpdate" />
+									<!-- Account Settings Tab -->
+									<div v-if="activeTab === 'account'">
+										<AccountSettings @settings-updated="handleSettingsUpdate" />
+									</div>
 
-						<!-- Security Settings -->
-						<SecuritySettings @security-updated="handleSecurityUpdate" />
-
-						<!-- Data & Privacy -->
-						<DataPrivacySettings @privacy-updated="handlePrivacyUpdate" />
+									<!-- Security Settings Tab -->
+									<div v-if="activeTab === 'security'">
+										<SecuritySettings @security-updated="handleSecurityUpdate" />
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -38,13 +70,15 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import ProfileOverview from '@/components/profile/ProfileOverview.vue'
 import PersonalInformation from '@/components/profile/PersonalInformation.vue'
 import AccountSettings from '@/components/profile/AccountSettings.vue'
-import NotificationPreferences from '@/components/profile/NotificationPreferences.vue'
-import SecuritySettings from '@/components/profile/SecuritySettings.vue'
-import DataPrivacySettings from '@/components/profile/DataPrivacySettings.vue'
+import SecuritySettings from "@/components/profile/SecuritySettings.vue";
+
+// Active tab state
+const activeTab = ref('personal')
 
 // Event handlers for profile operations
 const handleAvatarUpdate = (avatarData) => {
@@ -62,18 +96,8 @@ const handleSettingsUpdate = (settingsData) => {
 	// Update settings store or call API
 }
 
-const handleNotificationUpdate = (notificationData) => {
-	console.log('Notifications updated:', notificationData)
-	// Update notification preferences or call API
-}
-
 const handleSecurityUpdate = (securityData) => {
 	console.log('Security updated:', securityData)
 	// Update security settings or call API
-}
-
-const handlePrivacyUpdate = (privacyData) => {
-	console.log('Privacy updated:', privacyData)
-	// Update privacy settings or call API
 }
 </script>

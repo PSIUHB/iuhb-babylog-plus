@@ -106,37 +106,19 @@
 				<h4 class="text-lg font-semibold">Data Retention</h4>
 
 				<div class="space-y-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Keep activity logs for:</span>
-						</label>
-						<select v-model="privacySettings.activityLogRetention" class="select select-bordered">
-							<option value="30">30 days</option>
-							<option value="90">90 days</option>
-							<option value="180">6 months</option>
-							<option value="365">1 year</option>
-							<option value="forever">Forever</option>
-						</select>
-						<label class="label">
-							<span class="label-text-alt">How long to keep detailed activity logs</span>
-						</label>
-					</div>
+					<SelectInput
+						v-model="privacySettings.activityLogRetention"
+						label="Keep activity logs for:"
+						:options="activityLogRetentionOptions"
+						helpText="How long to keep detailed activity logs"
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Auto-delete old photos after:</span>
-						</label>
-						<select v-model="privacySettings.photoRetention" class="select select-bordered">
-							<option value="never">Never delete</option>
-							<option value="365">1 year</option>
-							<option value="730">2 years</option>
-							<option value="1095">3 years</option>
-							<option value="1825">5 years</option>
-						</select>
-						<label class="label">
-							<span class="label-text-alt">Automatically remove old photos to save space</span>
-						</label>
-					</div>
+					<SelectInput
+						v-model="privacySettings.photoRetention"
+						label="Auto-delete old photos after:"
+						:options="photoRetentionOptions"
+						helpText="Automatically remove old photos to save space"
+					/>
 				</div>
 			</div>
 
@@ -316,8 +298,26 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
 
 const emit = defineEmits(['privacy-updated'])
+
+// Options for select inputs
+const activityLogRetentionOptions = [
+  { value: '30', label: '30 days' },
+  { value: '90', label: '90 days' },
+  { value: '180', label: '6 months' },
+  { value: '365', label: '1 year' },
+  { value: 'forever', label: 'Forever' }
+]
+
+const photoRetentionOptions = [
+  { value: 'never', label: 'Never delete' },
+  { value: '365', label: '1 year' },
+  { value: '730', label: '2 years' },
+  { value: '1095', label: '3 years' },
+  { value: '1825', label: '5 years' }
+]
 
 // Reactive data
 const isSaving = ref(false)

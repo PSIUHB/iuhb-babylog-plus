@@ -16,11 +16,11 @@
 		<div v-else class="space-y-3">
 			<div v-for="caregiver in activeCaregivers" :key="caregiver.id" class="flex items-center space-x-3">
 				<div class="relative">
-					<div class="avatar">
-						<div class="w-10 h-10 rounded-full">
-							<img :src="caregiver.avatarUrl ? MediaService.getAvatarUrl(caregiver.avatarUrl) : MediaService.getInitialsAvatar(caregiver.name)" :alt="caregiver.name" />
-						</div>
-					</div>
+					<Avatar
+						:src="caregiver.avatarUrl"
+						:name="caregiver.name"
+						size="xs"
+					/>
 					<!-- Online indicator -->
 					<div class="absolute -bottom-0 -right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100"></div>
 				</div>
@@ -45,11 +45,11 @@
 			<p class="text-xs text-base-content/50 mb-2">Offline ({{ offlineCaregivers.length }})</p>
 			<div class="space-y-2">
 				<div v-for="caregiver in offlineCaregivers.slice(0, 3)" :key="caregiver.id" class="flex items-center space-x-3 opacity-60">
-					<div class="avatar">
-						<div class="w-8 h-8 rounded-full">
-							<img :src="caregiver.avatarUrl ? MediaService.getAvatarUrl(caregiver.avatarUrl) : MediaService.getInitialsAvatar(caregiver.name)" :alt="caregiver.name" />
-						</div>
-					</div>
+					<Avatar
+						:src="caregiver.avatarUrl"
+						:name="caregiver.name"
+						size="xs"
+					/>
 					<div class="flex-1 min-w-0">
 						<p class="text-xs text-base-content/70 truncate">
 							{{ caregiver.name }}
@@ -71,6 +71,7 @@
 import { computed, onMounted } from 'vue'
 import { useFamilyStore } from '@/stores/family.store'
 import MediaService from '@/services/media.service'
+import Avatar from '@/components/ui/Avatar.vue'
 
 const familyStore = useFamilyStore()
 

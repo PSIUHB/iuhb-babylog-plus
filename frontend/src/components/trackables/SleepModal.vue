@@ -6,72 +6,47 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Sleep Status</span>
-        </label>
-        <select v-model="form.status" class="select select-bordered w-full">
-          <option :value="SleepStatus.START">Start Sleep</option>
-          <option :value="SleepStatus.END">End Sleep</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.status"
+        label="Sleep Status"
+        :options="sleepStatusOptions"
+      />
 
-      <div v-if="form.status === SleepStatus.END" class="form-control">
-        <label class="label">
-          <span class="label-text">Duration (minutes)</span>
-        </label>
-        <input
-          type="number"
+      <div v-if="form.status === SleepStatus.END">
+        <TextInput
           v-model.number="form.duration_minutes"
-          class="input input-bordered w-full"
+          type="number"
+          label="Duration (minutes)"
           min="0"
         />
       </div>
 
-      <div v-if="form.status === SleepStatus.END" class="form-control">
-        <label class="label">
-          <span class="label-text">Sleep Quality</span>
-        </label>
-        <select v-model="form.quality" class="select select-bordered w-full">
-          <option :value="SleepQuality.POOR">Poor</option>
-          <option :value="SleepQuality.FAIR">Fair</option>
-          <option :value="SleepQuality.GOOD">Good</option>
-        </select>
-      </div>
+      <SelectInput
+        v-if="form.status === SleepStatus.END"
+        v-model="form.quality"
+        label="Sleep Quality"
+        :options="sleepQualityOptions"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Location</span>
-        </label>
-        <input
-          type="text"
-          v-model="form.location"
-          class="input input-bordered w-full"
-          placeholder="e.g., Crib, Bed, Stroller"
-        />
-      </div>
+      <TextInput
+        v-model="form.location"
+        label="Location"
+        placeholder="e.g., Crib, Bed, Stroller"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -84,6 +59,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
+import SelectInput from '@/components/ui/SelectInput.vue';
 import sleepsService from '@/services/sleeps.service';
 import { SleepStatus, SleepQuality } from '@/interfaces/trackable.interface';
 
@@ -98,6 +75,18 @@ const emit = defineEmits(['created', 'updated']);
 
 const modal = ref(null);
 const error = ref('');
+
+// Options for select inputs
+const sleepStatusOptions = [
+  { value: SleepStatus.START, label: 'Start Sleep' },
+  { value: SleepStatus.END, label: 'End Sleep' }
+];
+
+const sleepQualityOptions = [
+  { value: SleepQuality.POOR, label: 'Poor' },
+  { value: SleepQuality.FAIR, label: 'Fair' },
+  { value: SleepQuality.GOOD, label: 'Good' }
+];
 
 const defaultForm = {
   childId: props.childId,

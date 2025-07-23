@@ -45,29 +45,16 @@
 			class="border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow"
 		>
 			<div class="flex items-center gap-4">
-				<!-- Caregiver Avatar -->
-				<div
-					class="avatar"
-					:class="getAvatarStatusClass(caregiver)"
-				>
-					<div class="w-16 h-16 rounded-full">
-						<img
-							:src="caregiver.avatar ? MediaService.getAvatarUrl(caregiver.avatar) : getDefaultAvatar(`${caregiver.firstName} ${caregiver.lastName}`)"
-							:alt="`${caregiver.firstName} ${caregiver.lastName}`"
-						/>
-					</div>
-				</div>
+				<Avatar
+					:src="caregiver.avatar"
+					:name="`${caregiver.firstName} ${caregiver.lastName}`"
+					size="lg"
+				/>
 
 				<!-- Caregiver Information -->
 				<div class="flex-1">
 					<div class="flex items-center gap-2 mb-1">
 						<h3 class="font-bold text-lg">{{ `${caregiver.firstName} ${caregiver.lastName}` }}</h3>
-						<div
-							class="badge badge-sm"
-							:class="getStatusBadgeClass(caregiver.status)"
-						>
-							{{ caregiver.status }}
-						</div>
 						<div
 							v-if="caregiver.role === 'owner'"
 							class="badge badge-primary badge-sm"
@@ -128,100 +115,59 @@
 			<form @submit.prevent="sendInvitation" class="space-y-4">
 				<!-- Basic Information -->
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">First Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="inviteForm.firstName"
-							placeholder="Enter first name"
-							class="input input-bordered"
-							:class="{ 'input-error': inviteErrors.firstName }"
-							required
-						/>
-						<label class="label" v-if="inviteErrors.firstName">
-							<span class="label-text-alt text-error">{{ inviteErrors.firstName }}</span>
-						</label>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Last Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="inviteForm.lastName"
-							placeholder="Enter last name"
-							class="input input-bordered"
-							:class="{ 'input-error': inviteErrors.lastName }"
-							required
-						/>
-						<label class="label" v-if="inviteErrors.lastName">
-							<span class="label-text-alt text-error">{{ inviteErrors.lastName }}</span>
-						</label>
-					</div>
-				</div>
-
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Email Address *</span>
-					</label>
-					<input
-						type="email"
-						v-model="inviteForm.email"
-						placeholder="caregiver@example.com"
-						class="input input-bordered"
-						:class="{ 'input-error': inviteErrors.email }"
+					<TextInput
+						v-model="inviteForm.firstName"
+						label="First Name *"
+						placeholder="Enter first name"
+						:error="inviteErrors.firstName"
 						required
 					/>
-					<label class="label" v-if="inviteErrors.email">
-						<span class="label-text-alt text-error">{{ inviteErrors.email }}</span>
-					</label>
+
+					<TextInput
+						v-model="inviteForm.lastName"
+						label="Last Name *"
+						placeholder="Enter last name"
+						:error="inviteErrors.lastName"
+						required
+					/>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Phone Number</span>
-						</label>
-						<input
-							type="tel"
-							v-model="inviteForm.phone"
-							placeholder="+49 123 456 7890"
-							class="input input-bordered"
-						/>
-					</div>
+				<TextInput
+					v-model="inviteForm.email"
+					type="email"
+					label="Email Address *"
+					placeholder="caregiver@example.com"
+					:error="inviteErrors.email"
+					required
+				/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Role</span>
-						</label>
-						<select v-model="inviteForm.role" class="select select-bordered">
-							<option value="parent">Parent</option>
-							<option value="caregiver">Caregiver</option>
-							<option value="viewer">Viewer Only</option>
-						</select>
-					</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<TextInput
+						v-model="inviteForm.phone"
+						type="tel"
+						label="Phone Number"
+						placeholder="+49 123 456 7890"
+					/>
+
+					<SelectInput
+						v-model="inviteForm.role"
+						label="Role"
+						:options="roleOptions"
+					/>
 				</div>
 
 				<!-- Permissions section removed as permissions are now determined by role -->
 
 				<!-- Personal Message -->
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Personal Message (Optional)</span>
-					</label>
-					<textarea
-						v-model="inviteForm.message"
-						placeholder="Add a personal message to the invitation..."
-						class="textarea textarea-bordered h-20"
-						maxlength="300"
-					></textarea>
-					<label class="label">
-						<span class="label-text-alt">{{ inviteForm.message?.length || 0 }}/300 characters</span>
-					</label>
-				</div>
+				<TextInput
+					v-model="inviteForm.message"
+					type="textarea"
+					label="Personal Message (Optional)"
+					placeholder="Add a personal message to the invitation..."
+					maxlength="300"
+					:rows="5"
+					showCharCount
+				/>
 
 				<!-- Modal Actions -->
 				<div class="modal-action">
@@ -256,52 +202,30 @@
 
 			<form @submit.prevent="updateCaregiver" class="space-y-4">
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">First Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="editForm.firstName"
-							class="input input-bordered"
-							required
-						/>
-					</div>
+					<TextInput
+						v-model="editForm.firstName"
+						label="First Name *"
+						required
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Last Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="editForm.lastName"
-							class="input input-bordered"
-							required
-						/>
-					</div>
-				</div>
-
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Role</span>
-					</label>
-					<select v-model="editForm.role" class="select select-bordered">
-						<option value="parent">Parent</option>
-						<option value="caregiver">Caregiver</option>
-						<option value="viewer">Viewer Only</option>
-					</select>
-				</div>
-
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Phone Number</span>
-					</label>
-					<input
-						type="tel"
-						v-model="editForm.phone"
-						class="input input-bordered"
+					<TextInput
+						v-model="editForm.lastName"
+						label="Last Name *"
+						required
 					/>
 				</div>
+
+				<SelectInput
+					v-model="editForm.role"
+					label="Role"
+					:options="roleOptions"
+				/>
+
+				<TextInput
+					v-model="editForm.phone"
+					type="tel"
+					label="Phone Number"
+				/>
 
 				<!-- Permissions section removed as permissions are now determined by role -->
 
@@ -370,7 +294,10 @@
 import { ref, reactive, watch } from 'vue'
 import CaregiversService from '@/services/caregivers.service'
 import MediaService from '@/services/media.service'
+import Avatar from '@/components/ui/Avatar.vue'
 import { usePermissions, Permission } from '@/services/permissions.service'
+import TextInput from '@/components/ui/TextInput.vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
 
 const props = defineProps({
 	familyId: {
@@ -433,6 +360,13 @@ const editForm = reactive({
 
 // Permissions are now determined by role, so we don't need to define available permissions
 
+// Options for select inputs
+const roleOptions = [
+  { value: 'parent', label: 'Parent' },
+  { value: 'caregiver', label: 'Caregiver' },
+  { value: 'viewer', label: 'Viewer Only' }
+]
+
 // Caregivers data
 const caregivers = ref([])
 
@@ -468,28 +402,6 @@ watch(() => props.familyId, (newFamilyId) => {
 	}
 }, { immediate: true })
 
-// Methods
-const getAvatarStatusClass = (caregiver) => {
-	if (caregiver.status === 'pending') return ''
-
-	const now = new Date()
-	const lastActive = new Date(caregiver.lastActive)
-	const diffMinutes = (now - lastActive) / (1000 * 60)
-
-	if (diffMinutes < 5) return 'avatar-online'
-	if (diffMinutes < 60) return 'avatar-away'
-	return 'avatar-offline'
-}
-
-const getStatusBadgeClass = (status) => {
-	switch (status) {
-		case 'active': return 'badge-success'
-		case 'pending': return 'badge-warning'
-		case 'inactive': return 'badge-error'
-		default: return 'badge-ghost'
-	}
-}
-
 const getRoleLabel = (role) => {
 	const labels = {
 		owner: 'Family Owner',
@@ -519,10 +431,6 @@ const formatLastActive = (lastActive) => {
 	return `${diffDays}d ago`
 }
 
-const getDefaultAvatar = (name) => {
-	// Use MediaService to generate an avatar with initials
-	return MediaService.getInitialsAvatar(name)
-}
 
 const openInviteModal = () => {
 	if (!canInviteCaregivers.value) {

@@ -6,64 +6,40 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Temperature Value</span>
-        </label>
-        <input
-          type="number"
-          v-model.number="form.value"
-          class="input input-bordered w-full"
-          step="0.1"
-          min="30"
-          max="45"
-        />
-      </div>
+      <TextInput
+        v-model.number="form.value"
+        type="number"
+        label="Temperature Value"
+        step="0.1"
+        min="30"
+        max="45"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Unit</span>
-        </label>
-        <select v-model="form.unit" class="select select-bordered w-full">
-          <option :value="TemperatureUnit.CELSIUS">Celsius (°C)</option>
-          <option :value="TemperatureUnit.FAHRENHEIT">Fahrenheit (°F)</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.unit"
+        label="Unit"
+        :options="temperatureUnitOptions"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Measurement Location</span>
-        </label>
-        <select v-model="form.location" class="select select-bordered w-full">
-          <option :value="TemperatureLocation.ORAL">Oral</option>
-          <option :value="TemperatureLocation.RECTAL">Rectal</option>
-          <option :value="TemperatureLocation.ARMPIT">Armpit</option>
-          <option :value="TemperatureLocation.EAR">Ear</option>
-          <option :value="TemperatureLocation.FOREHEAD">Forehead</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.location"
+        label="Measurement Location"
+        :options="temperatureLocationOptions"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -76,6 +52,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
+import SelectInput from '@/components/ui/SelectInput.vue';
 import temperaturesService from '@/services/temperatures.service';
 import { TemperatureUnit, TemperatureLocation } from '@/interfaces/trackable.interface';
 
@@ -90,6 +68,20 @@ const emit = defineEmits(['created', 'updated']);
 
 const modal = ref(null);
 const error = ref('');
+
+// Options for select inputs
+const temperatureUnitOptions = [
+  { value: TemperatureUnit.CELSIUS, label: 'Celsius (°C)' },
+  { value: TemperatureUnit.FAHRENHEIT, label: 'Fahrenheit (°F)' }
+];
+
+const temperatureLocationOptions = [
+  { value: TemperatureLocation.ORAL, label: 'Oral' },
+  { value: TemperatureLocation.RECTAL, label: 'Rectal' },
+  { value: TemperatureLocation.ARMPIT, label: 'Armpit' },
+  { value: TemperatureLocation.EAR, label: 'Ear' },
+  { value: TemperatureLocation.FOREHEAD, label: 'Forehead' }
+];
 
 const defaultForm = {
   childId: props.childId,

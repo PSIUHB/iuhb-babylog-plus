@@ -1,22 +1,17 @@
 <template>
-	<div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar p-2 flex items-center justify-center">
-			<img 
-				:src="user?.avatarUrl 
-					? MediaService.getAvatarUrl(user.avatarUrl) 
-					: MediaService.getInitialsAvatar(user?.firstName + ' ' + user?.lastName || 'User')" 
-				:alt="user?.firstName || 'User'" 
-				class="rounded-full" 
+	<div class="dropdown dropdown-end w-full">
+  		<a role="button" href="javascript:void(0)" class="flex items-center justify-center w-full p-0">
+			<Avatar
+				:src="user?.avatarUrl"
+				:name="user?.firstName + ' ' + user?.lastName || 'User'"
+				size="xs"
 			/>
-		</div>
+		</a>
 		<ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg">
-			<li v-if="user" class="p-2 text-center font-medium">
+			<li v-if="user" class="px-2 py-2 font-medium">
 				{{ user.firstName }} {{ user.lastName }}
 			</li>
-			<div v-if="user" class="divider my-1"></div>
-			<li><router-link to="/profile">Profile</router-link></li>
-			<li><router-link to="/settings">Settings</router-link></li>
-			<li><a href="/help" target="_blank">Help</a></li>
+			<li><router-link to="/app/settings">Profile</router-link></li>
 			<div class="divider my-1"></div>
 			<li><a class="text-error" @click="handleLogout">Logout</a></li>
 		</ul>
@@ -27,7 +22,7 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { computed } from 'vue'
-import MediaService from '@/services/media.service'
+import Avatar from '@/components/ui/Avatar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

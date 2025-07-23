@@ -5,17 +5,13 @@
 	>
   	<div class="card-body">
 		<div class="flex items-center gap-4 mb-4">
-			<div class="avatar">
-				<div
-					class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none overflow-hidden"
-					:class="avatarClasses"
-				>
-					<!-- Show image if avatarUrl exists -->
-					<img v-if="baby.avatarUrl" :src="MediaService.getAvatarUrl(baby.avatarUrl)" :alt="baby.name" class="w-full h-full object-cover" />
-					<!-- Show initial if no avatarUrl -->
-					<span v-else class="text-2xl font-bold flex items-center justify-center w-full h-full">{{ baby.initial }}</span>
-				</div>
-			</div>
+			<Avatar
+				:src="baby.avatarUrl"
+				:name="baby.name"
+				size="lg"
+				:bgColor="baby.gender === 'female' ? '6366f1' : '0ea5e9'"
+				:textColor="'ffffff'"
+			/>
 			<div>
 				<h3 class="card-title" :class="titleClasses">
 					{{ baby.name }}
@@ -91,7 +87,9 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { TrackableType } from '@/enums/trackable-type.enum'
 import { useChildAutoUpdate } from '@/composables/useAutoUpdate'
+import { formatTimeAgo } from '@/utils/timeUtils'
 import MediaService from '@/services/media.service'
+import Avatar from '@/components/ui/Avatar.vue'
 
 // Import trackable modal components
 import FeedModal from '@/components/trackables/FeedModal.vue'
@@ -139,22 +137,6 @@ const { isUpdating, updateCount } = useChildAutoUpdate(
   }
 )
 
-// Format time ago
-const formatTimeAgo = (timestamp) => {
-  if (!timestamp) return 'No data'
-  
-  const now = new Date()
-  const date = new Date(timestamp)
-  const diffMs = now - date
-  const diffMins = Math.round(diffMs / (1000 * 60))
-  const diffHours = Math.round(diffMs / (1000 * 60 * 60))
-
-  if (diffMins < 60) {
-    return `${diffMins}m ago`
-  } else {
-    return `${diffHours}h ${diffMins % 60}m ago`
-  }
-}
 
 // Fetch child's current status
 const fetchChildStatus = async () => {

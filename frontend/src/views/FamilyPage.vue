@@ -17,35 +17,33 @@
 					<p class="text-base-content/70">Manage your family settings, children, and caregivers</p>
 				</div>
 
+				<!-- Family Statistics -->
+				<div class="mb-6">
+					<FamilyStatistics :family-id="family.id" />
+				</div>
+
 				<!-- Tabs Navigation -->
-				<div role="tablist" class="tabs tabs-box tabs-lg mb-6">
+				<div role="tablist" class="tabs tabs-boxed bg-base-200 rounded-t-lg mb-6">
 					<a role="tab"
-					   class="tab"
+					   class="tab tab-lg flex-1"
 					   :class="{ 'tab-active': activeTab === 'settings' }"
 					   @click="activeTab = 'settings'"
 					>
 						Family Settings
 					</a>
 					<a role="tab"
-					   class="tab"
+					   class="tab tab-lg flex-1"
 					   :class="{ 'tab-active': activeTab === 'children' }"
 					   @click="activeTab = 'children'"
 					>
 						Children Management
 					</a>
 					<a role="tab"
-					   class="tab"
+					   class="tab tab-lg flex-1"
 					   :class="{ 'tab-active': activeTab === 'caregivers' }"
 					   @click="activeTab = 'caregivers'"
 					>
 						Caregivers Management
-					</a>
-					<a role="tab"
-					   class="tab"
-					   :class="{ 'tab-active': activeTab === 'milestones' }"
-					   @click="activeTab = 'milestones'"
-					>
-						Milestones
 					</a>
 				</div>
 
@@ -79,36 +77,6 @@
 						/>
 					</div>
 
-					<!-- Milestones Tab -->
-					<div v-if="activeTab === 'milestones'">
-						<div v-if="selectedChild">
-							<MilestoneTracker :child-id="selectedChild.id" :child="selectedChild" />
-						</div>
-						<div v-else class="text-center py-8">
-							<div class="text-base-content/50 mb-4">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-								<p>Please select a child to view milestones</p>
-							</div>
-							<div class="flex flex-wrap gap-2 justify-center">
-								<button
-									v-for="child in children"
-									:key="child.id"
-									class="btn btn-outline"
-									:class="{ 'btn-primary': selectedChild && selectedChild.id === child.id }"
-									@click="selectChild(child)"
-								>
-									{{ child.firstName }} {{ child.lastName }}
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Family Statistics -->
-				<div class="mb-8">
-					<FamilyStatistics :family-id="family.id" />
 				</div>
 			</div>
 		</AppLayout>
@@ -123,7 +91,6 @@ import FamilySettings from '@/components/family/FamilySettings.vue'
 import ChildrenManagement from '@/components/family/ChildrenManagement.vue'
 import CaregiversManagement from '@/components/family/CaregiversManagement.vue'
 import FamilyStatistics from '@/components/family/FamilyStatistics.vue'
-import MilestoneTracker from '@/components/milestones/MilestoneTracker.vue'
 import FamiliesService from '@/services/families.service'
 import ChildrenService from '@/services/children.service'
 import CaregiversService from '@/services/caregivers.service'
@@ -134,7 +101,6 @@ const loading = ref(true)
 const error = ref(null)
 const activeTab = ref('settings') // Default active tab
 const children = ref([])
-const selectedChild = ref(null)
 
 // Fetch family data on component mount
 onMounted(async () => {
@@ -234,20 +200,11 @@ const fetchChildren = async () => {
 	try {
 		const response = await ChildrenService.getChildrenByFamily(family.value.id)
 		children.value = response || []
-		
-		// If we have children and none is selected, select the first one
-		if (children.value.length > 0 && !selectedChild.value) {
-			selectedChild.value = children.value[0]
-		}
 	} catch (err) {
 		console.error('Error fetching children:', err)
 	}
 }
 
-// Select a child for milestone viewing
-const selectChild = (child) => {
-	selectedChild.value = child
-}
 
 // Watch for family changes to fetch children
 watch(() => family.value.id, (newFamilyId) => {
@@ -256,10 +213,4 @@ watch(() => family.value.id, (newFamilyId) => {
 	}
 }, { immediate: true })
 
-// Watch for tab changes to fetch children when milestones tab is selected
-watch(() => activeTab.value, (newTab) => {
-	if (newTab === 'milestones') {
-		fetchChildren()
-	}
-})
 </script>

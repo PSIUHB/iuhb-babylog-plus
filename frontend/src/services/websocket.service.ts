@@ -179,6 +179,7 @@ class WebSocketService {
             'family.member.left',
             'family.member.updated',
             'family.member.removed',
+            'family.connected.caregivers', // Add this missing event
             'child.created',
             'child.updated',
             'trackable.created',

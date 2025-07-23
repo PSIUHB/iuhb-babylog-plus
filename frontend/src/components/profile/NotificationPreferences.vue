@@ -199,27 +199,17 @@
 						</label>
 
 						<div v-if="preferences.quietHours.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
-							<div class="form-control">
-								<label class="label">
-									<span class="label-text">Start Time</span>
-								</label>
-								<input
-									type="time"
-									v-model="preferences.quietHours.startTime"
-									class="input input-bordered"
-								/>
-							</div>
+							<TextInput
+								v-model="preferences.quietHours.startTime"
+								type="time"
+								label="Start Time"
+							/>
 
-							<div class="form-control">
-								<label class="label">
-									<span class="label-text">End Time</span>
-								</label>
-								<input
-									type="time"
-									v-model="preferences.quietHours.endTime"
-									class="input input-bordered"
-								/>
-							</div>
+							<TextInput
+								v-model="preferences.quietHours.endTime"
+								type="time"
+								label="End Time"
+							/>
 						</div>
 
 						<div v-if="preferences.quietHours.enabled" class="pl-6">
@@ -287,29 +277,17 @@
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold">Notification Frequency</h4>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Daily Summary Time</span>
-						</label>
-						<select v-model="preferences.frequency.dailySummaryTime" class="select select-bordered">
-							<option value="morning">Morning (8:00 AM)</option>
-							<option value="afternoon">Afternoon (2:00 PM)</option>
-							<option value="evening">Evening (7:00 PM)</option>
-							<option value="night">Night (10:00 PM)</option>
-						</select>
-					</div>
+					<SelectInput
+						v-model="preferences.frequency.dailySummaryTime"
+						label="Daily Summary Time"
+						:options="dailySummaryTimeOptions"
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Weekly Report Day</span>
-						</label>
-						<select v-model="preferences.frequency.weeklyReportDay" class="select select-bordered">
-							<option value="sunday">Sunday</option>
-							<option value="monday">Monday</option>
-							<option value="friday">Friday</option>
-							<option value="saturday">Saturday</option>
-						</select>
-					</div>
+					<SelectInput
+						v-model="preferences.frequency.weeklyReportDay"
+						label="Weekly Report Day"
+						:options="weeklyReportDayOptions"
+					/>
 				</div>
 
 				<!-- Test Notifications -->
@@ -370,12 +348,29 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import TextInput from '@/components/ui/TextInput.vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
 
 const emit = defineEmits(['preferences-updated'])
 
 // Reactive data
 const isSaving = ref(false)
 const isTesting = ref(false)
+
+// Options for select inputs
+const dailySummaryTimeOptions = [
+  { value: 'morning', label: 'Morning (8:00 AM)' },
+  { value: 'afternoon', label: 'Afternoon (2:00 PM)' },
+  { value: 'evening', label: 'Evening (7:00 PM)' },
+  { value: 'night', label: 'Night (10:00 PM)' }
+]
+
+const weeklyReportDayOptions = [
+  { value: 'sunday', label: 'Sunday' },
+  { value: 'monday', label: 'Monday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' }
+]
 
 // Notification preferences
 const preferences = reactive({

@@ -6,50 +6,33 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Weight Value</span>
-        </label>
-        <input
-          type="number"
-          v-model.number="form.value"
-          class="input input-bordered w-full"
-          step="0.01"
-          min="0"
-        />
-      </div>
+      <TextInput
+        v-model.number="form.value"
+        type="number"
+        label="Weight Value"
+        step="0.01"
+        min="0"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Unit</span>
-        </label>
-        <select v-model="form.unit" class="select select-bordered w-full">
-          <option :value="WeightUnit.KG">Kilograms (kg)</option>
-          <option :value="WeightUnit.LB">Pounds (lb)</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.unit"
+        label="Unit"
+        :options="weightUnitOptions"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -62,6 +45,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
+import SelectInput from '@/components/ui/SelectInput.vue';
 import weightsService from '@/services/weights.service';
 import { WeightUnit } from '@/interfaces/trackable.interface';
 
@@ -76,6 +61,12 @@ const emit = defineEmits(['created', 'updated']);
 
 const modal = ref(null);
 const error = ref('');
+
+// Options for select inputs
+const weightUnitOptions = [
+  { value: WeightUnit.KG, label: 'Kilograms (kg)' },
+  { value: WeightUnit.LB, label: 'Pounds (lb)' }
+];
 
 const defaultForm = {
   childId: props.childId,

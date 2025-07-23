@@ -34,6 +34,7 @@ export const useFamilyStore = defineStore('family', {
       this.currentFamily = null;
       this.loading = false;
       this.error = null;
+      this.connectedCaregivers = []; // Reset connected caregivers as well
     },
 
     async fetchFamilies() {
@@ -76,9 +77,18 @@ export const useFamilyStore = defineStore('family', {
     // Add a new method to set current family by ID and load full details
     async setCurrentFamilyById(familyId: string) {
       this.loading = true;
+      // Reset connected caregivers when switching families
+      this.connectedCaregivers = [];
+
       try {
         const familyWithDetails = await familiesService.getFamily(familyId);
         this.currentFamily = familyWithDetails;
+
+        // Request connected caregivers for the new family
+        if (websocketService.isConnected.value) {
+          websocketService.requestConnectedCaregivers(familyId);
+        }
+
         return familyWithDetails;
       } catch (error) {
         // Keep the basic family info if detailed loading fails
@@ -252,7 +262,6 @@ export const useFamilyStore = defineStore('family', {
         const isConnected = await waitForConnection();
 
         if (isConnected) {
-          console.log('Requesting initial connected caregivers status...');
 
           // Request for current family if available
           if (this.currentFamily?.id) {
@@ -261,12 +270,8 @@ export const useFamilyStore = defineStore('family', {
             // Request for all families
             websocketService.requestConnectedCaregivers();
           }
-        } else {
-          console.warn('WebSocket not connected, skipping initial connected caregivers request');
         }
-      } catch (error) {
-        console.error('Error requesting initial connected caregivers:', error);
-      }
+      } catch (error) { }
     },
 
     // Handle family updated event

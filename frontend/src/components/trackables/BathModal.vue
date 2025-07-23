@@ -6,65 +6,41 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Duration (minutes)</span>
-        </label>
-        <input
-          type="number"
-          v-model.number="form.duration_minutes"
-          class="input input-bordered w-full"
-          min="0"
-        />
-      </div>
+      <TextInput
+        v-model.number="form.duration_minutes"
+        type="number"
+        label="Duration (minutes)"
+        min="0"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Water Temperature (°C)</span>
-        </label>
-        <input
-          type="number"
-          v-model.number="form.water_temperature"
-          class="input input-bordered w-full"
-          step="0.1"
-          min="20"
-          max="45"
-        />
-      </div>
+      <TextInput
+        v-model.number="form.water_temperature"
+        type="number"
+        label="Water Temperature (°C)"
+        step="0.1"
+        min="20"
+        max="45"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Products Used</span>
-        </label>
-        <input
-          type="text"
-          v-model="form.products_used"
-          class="input input-bordered w-full"
-          placeholder="e.g., Baby Shampoo, Soap, Lotion"
-        />
-      </div>
+      <TextInput
+        v-model="form.products_used"
+        label="Products Used"
+        placeholder="e.g., Baby Shampoo, Soap, Lotion"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -77,6 +53,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
 import bathsService from '@/services/baths.service';
 
 const props = defineProps({

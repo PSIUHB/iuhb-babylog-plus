@@ -13,8 +13,6 @@
 		</div>
 
 		<div class="flex-none flex items-center gap-2">
-			<!-- Notifications -->
-			<NotificationDropdown />
 
 			<!-- User Menu -->
 			<UserDropdown />
@@ -23,6 +21,5 @@
 </template>
 
 <script setup>
-import NotificationDropdown from '../ui/NotificationDropdown.vue'
 import UserDropdown from '../ui/UserDropdown.vue'
 </script>

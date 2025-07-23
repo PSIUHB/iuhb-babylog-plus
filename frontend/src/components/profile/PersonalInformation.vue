@@ -1,279 +1,88 @@
 <template>
-	<div class="card bg-base-100 shadow-lg">
-		<div class="card-body">
-			<h3 class="card-title mb-6">Personal Information</h3>
+	<h3 class="card-title mb-6">Personal Information</h3>
 
-			<form @submit.prevent="savePersonalInfo" class="space-y-6">
-				<!-- Basic Information -->
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">First Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="personalInfo.firstName"
-							placeholder="Enter your first name"
-							class="input input-bordered"
-							:class="{ 'input-error': errors.firstName }"
-							required
-						/>
-						<label class="label" v-if="errors.firstName">
-							<span class="label-text-alt text-error">{{ errors.firstName }}</span>
-						</label>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Last Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="personalInfo.lastName"
-							placeholder="Enter your last name"
-							class="input input-bordered"
-							:class="{ 'input-error': errors.lastName }"
-							required
-						/>
-						<label class="label" v-if="errors.lastName">
-							<span class="label-text-alt text-error">{{ errors.lastName }}</span>
-						</label>
-					</div>
-				</div>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Email Address *</span>
-						</label>
-						<input
-							type="email"
-							v-model="personalInfo.email"
-							placeholder="your.email@example.com"
-							class="input input-bordered"
-							:class="{ 'input-error': errors.email }"
-							required
-						/>
-						<label class="label" v-if="errors.email">
-							<span class="label-text-alt text-error">{{ errors.email }}</span>
-						</label>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Phone Number</span>
-						</label>
-						<input
-							type="tel"
-							v-model="personalInfo.phone"
-							placeholder="+49 123 456 7890"
-							class="input input-bordered"
-						/>
-						<label class="label">
-							<span class="label-text-alt">Used for important notifications</span>
-						</label>
-					</div>
-				</div>
-
-				<!-- Additional Information -->
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Date of Birth</span>
-						</label>
-						<input
-							type="date"
-							v-model="personalInfo.dateOfBirth"
-							class="input input-bordered"
-							:max="maxBirthDate"
-						/>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Gender</span>
-						</label>
-						<select v-model="personalInfo.gender" class="select select-bordered">
-							<option value="">Select gender</option>
-							<option value="female">Female</option>
-							<option value="male">Male</option>
-							<option value="other">Other</option>
-							<option value="prefer-not-to-say">Prefer not to say</option>
-						</select>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-semibold">Preferred Language</span>
-						</label>
-						<select v-model="personalInfo.language" class="select select-bordered">
-							<option value="en">English</option>
-							<option value="de">German</option>
-							<option value="fr">French</option>
-							<option value="es">Spanish</option>
-							<option value="it">Italian</option>
-						</select>
-					</div>
-				</div>
-
-				<!-- Location Information -->
-				<div class="space-y-4">
-					<h4 class="text-lg font-semibold">Location Information</h4>
-
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Country</span>
-							</label>
-							<select v-model="personalInfo.country" class="select select-bordered">
-								<option value="">Select country</option>
-								<option value="DE">Germany</option>
-								<option value="US">United States</option>
-								<option value="GB">United Kingdom</option>
-								<option value="FR">France</option>
-								<option value="ES">Spain</option>
-								<option value="IT">Italy</option>
-								<option value="AT">Austria</option>
-								<option value="CH">Switzerland</option>
-							</select>
-						</div>
-
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">City</span>
-							</label>
-							<input
-								type="text"
-								v-model="personalInfo.city"
-								placeholder="Enter your city"
-								class="input input-bordered"
-							/>
-						</div>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Time Zone</span>
-						</label>
-						<select v-model="personalInfo.timezone" class="select select-bordered">
-							<option value="">Auto-detect from location</option>
-							<option value="Europe/Berlin">Central European Time (CET)</option>
-							<option value="Europe/London">Greenwich Mean Time (GMT)</option>
-							<option value="America/New_York">Eastern Standard Time (EST)</option>
-							<option value="America/Los_Angeles">Pacific Standard Time (PST)</option>
-							<option value="Asia/Tokyo">Japan Standard Time (JST)</option>
-							<option value="Australia/Sydney">Australian Eastern Time (AET)</option>
-						</select>
-					</div>
-				</div>
-
-				<!-- Bio/About -->
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text font-semibold">About Me</span>
-					</label>
-					<textarea
-						v-model="personalInfo.bio"
-						placeholder="Tell us about yourself and your family..."
-						class="textarea textarea-bordered h-24"
-						maxlength="300"
-					></textarea>
-					<label class="label">
-						<span class="label-text-alt">{{ personalInfo.bio?.length || 0 }}/300 characters</span>
-					</label>
-				</div>
-
-				<!-- Emergency Contact -->
-				<div class="space-y-4">
-					<h4 class="text-lg font-semibold">Emergency Contact</h4>
-
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Contact Name</span>
-							</label>
-							<input
-								type="text"
-								v-model="personalInfo.emergencyContact.name"
-								placeholder="Full name"
-								class="input input-bordered"
-							/>
-						</div>
-
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Relationship</span>
-							</label>
-							<select v-model="personalInfo.emergencyContact.relationship" class="select select-bordered">
-								<option value="">Select relationship</option>
-								<option value="spouse">Spouse/Partner</option>
-								<option value="parent">Parent</option>
-								<option value="sibling">Sibling</option>
-								<option value="friend">Friend</option>
-								<option value="other">Other</option>
-							</select>
-						</div>
-					</div>
-
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Phone Number</span>
-							</label>
-							<input
-								type="tel"
-								v-model="personalInfo.emergencyContact.phone"
-								placeholder="+49 123 456 7890"
-								class="input input-bordered"
-							/>
-						</div>
-
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Email</span>
-							</label>
-							<input
-								type="email"
-								v-model="personalInfo.emergencyContact.email"
-								placeholder="contact@example.com"
-								class="input input-bordered"
-							/>
-						</div>
-					</div>
-				</div>
-
-				<!-- Action Buttons -->
-				<div class="card-actions justify-end pt-6 border-t border-base-300">
-					<button
-						type="button"
-						class="btn btn-ghost"
-						@click="resetForm"
-						:disabled="isSaving"
-					>
-						Reset Changes
-					</button>
-					<button
-						type="submit"
-						class="btn btn-primary"
-						:class="{ 'loading': isSaving }"
-						:disabled="isSaving"
-					>
-						{{ isSaving ? 'Saving...' : 'Save Changes' }}
-					</button>
-				</div>
-			</form>
-		</div>
+	<!-- Loading indicator -->
+	<div v-if="loading" class="flex justify-center my-4">
+		<span class="loading loading-spinner loading-md text-primary"></span>
 	</div>
+
+	<form v-if="!loading" @submit.prevent="savePersonalInfo" class="space-y-6">
+		<!-- Basic Information -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<TextInput
+				v-model="personalInfo.firstName"
+				label="First Name"
+				placeholder="Enter your first name"
+				:error="errors.firstName"
+				required
+			/>
+
+			<TextInput
+				v-model="personalInfo.lastName"
+				label="Last Name"
+				placeholder="Enter your last name"
+				:error="errors.lastName"
+				required
+			/>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<TextInput
+				v-model="personalInfo.email"
+				type="email"
+				label="Email Address"
+				placeholder="your.email@example.com"
+				:error="errors.email"
+				required
+			/>
+		</div>
+
+		<!-- Bio/About -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<TextInput
+				v-model="personalInfo.bio"
+				type="textarea"
+				label="About Me"
+				placeholder="Tell us about yourself and your family..."
+				maxlength="300"
+				:rows="4"
+				showCharCount
+			/>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="card-actions justify-end pt-6 border-t border-base-300">
+			<button
+				type="button"
+				class="btn btn-ghost"
+				@click="resetForm"
+				:disabled="isSaving"
+			>
+				Reset Changes
+			</button>
+			<button
+				type="submit"
+				class="btn btn-primary"
+				:class="{ 'loading': isSaving }"
+				:disabled="isSaving"
+			>
+				{{ isSaving ? 'Saving...' : 'Save Changes' }}
+			</button>
+		</div>
+	</form>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import AuthService from '@/services/auth.service'
+import TextInput from '@/components/ui/TextInput.vue'
 
 const emit = defineEmits(['profile-updated'])
 
 // Reactive data
 const isSaving = ref(false)
 const errors = ref({})
+const loading = ref(true)
 
 // Current date for date input max
 const maxBirthDate = computed(() => {
@@ -282,29 +91,52 @@ const maxBirthDate = computed(() => {
 	return today.toISOString().split('T')[0]
 })
 
-// Personal information form
+// Personal information form with default values
 const personalInfo = reactive({
-	firstName: 'Sarah',
-	lastName: 'Johnson',
-	email: 'sarah.johnson@example.com',
-	phone: '+49 123 456 7890',
-	dateOfBirth: '1990-05-15',
-	gender: 'female',
-	language: 'en',
-	country: 'DE',
-	city: 'Berlin',
-	timezone: 'Europe/Berlin',
-	bio: 'Proud mom of twins Anna and Ben. Love sharing our parenting journey and learning from other families.',
-	emergencyContact: {
-		name: 'Michael Johnson',
-		relationship: 'spouse',
-		phone: '+49 987 654 3210',
-		email: 'michael.johnson@example.com'
-	}
+	firstName: '',
+	lastName: '',
+	email: '',
+	phone: '+49 123 456 7890', // Default value for fields not in API
+	dateOfBirth: '1990-05-15', // Default value
+	gender: 'female', // Default value
+	language: 'en', // Default value
+	country: 'DE', // Default value
+	city: 'Berlin', // Default value
+	timezone: 'Europe/Berlin', // Default value
+	bio: 'Proud mom of twins Anna and Ben. Love sharing our parenting journey and learning from other families.', // Default value
 })
 
 // Original data for reset functionality
 const originalData = { ...personalInfo }
+
+// Fetch user profile data
+const fetchUserProfile = async () => {
+	loading.value = true
+	
+	try {
+		const profile = await AuthService.getProfile()
+		
+		// Update personalInfo with real user data
+		personalInfo.firstName = profile.firstName
+		personalInfo.lastName = profile.lastName
+		personalInfo.email = profile.email
+		
+		// Update timezone and locale if available
+		if (profile.timezone) {
+			personalInfo.timezone = profile.timezone
+		}
+		if (profile.locale) {
+			personalInfo.language = profile.locale
+		}
+		
+		// Update original data for reset functionality
+		Object.assign(originalData, personalInfo)
+	} catch (err) {
+		console.error('Error fetching user profile:', err)
+	} finally {
+		loading.value = false
+	}
+}
 
 // Validation
 const validateForm = () => {
@@ -333,20 +165,68 @@ const savePersonalInfo = async () => {
 	if (!validateForm()) return
 
 	isSaving.value = true
+	errors.value = {}
 
 	try {
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1500))
+		// Prepare data for API
+		const updateData = {
+			firstName: personalInfo.firstName,
+			lastName: personalInfo.lastName,
+			email: personalInfo.email,
+			timezone: personalInfo.timezone,
+			locale: personalInfo.language
+		}
+
+		// Save to backend
+		const updatedProfile = await AuthService.updateProfile(updateData)
+
+		// Update local data with response
+		if (updatedProfile) {
+			personalInfo.firstName = updatedProfile.firstName
+			personalInfo.lastName = updatedProfile.lastName
+			personalInfo.email = updatedProfile.email
+			
+			if (updatedProfile.timezone) {
+				personalInfo.timezone = updatedProfile.timezone
+			}
+			if (updatedProfile.locale) {
+				personalInfo.language = updatedProfile.locale
+			}
+		}
 
 		emit('profile-updated', { ...personalInfo })
 
-		// Show success message
-		console.log('Profile updated successfully!')
+		// Show success message using toast or alert
+		const toast = document.createElement('div')
+		toast.className = 'toast toast-top toast-center'
+		toast.innerHTML = `
+			<div class="alert alert-success">
+				<span>Profile updated successfully!</span>
+			</div>
+		`
+		document.body.appendChild(toast)
+		setTimeout(() => {
+			document.body.removeChild(toast)
+		}, 3000)
 
 		// Update original data for future resets
 		Object.assign(originalData, personalInfo)
 	} catch (error) {
 		console.error('Error updating profile:', error)
+		
+		// Show error message
+		const errorMessage = error.response?.data?.message || 'Failed to update profile. Please try again.'
+		const toast = document.createElement('div')
+		toast.className = 'toast toast-top toast-center'
+		toast.innerHTML = `
+			<div class="alert alert-error">
+				<span>${errorMessage}</span>
+			</div>
+		`
+		document.body.appendChild(toast)
+		setTimeout(() => {
+			document.body.removeChild(toast)
+		}, 3000)
 	} finally {
 		isSaving.value = false
 	}
@@ -356,4 +236,9 @@ const resetForm = () => {
 	Object.assign(personalInfo, originalData)
 	errors.value = {}
 }
+
+// Initialize component
+onMounted(async () => {
+	await fetchUserProfile()
+})
 </script>

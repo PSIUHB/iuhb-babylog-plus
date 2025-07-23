@@ -1,115 +1,25 @@
 <template>
 	<form @submit.prevent="saveFamilySettings" class="space-y-6">
 		<!-- Family Name -->
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Family Name</span>
-				<span class="label-text-alt text-error" v-if="errors.familyName">{{ errors.familyName }}</span>
-			</label>
-			<input
-				type="text"
-				v-model="familyData.name"
-				placeholder="Enter your family name (e.g., The Johnson Family)"
-				class="input input-bordered w-full"
-				:class="{ 'input-error': errors.familyName }"
-				maxlength="50"
-			/>
-			<label class="label">
-				<span class="label-text-alt">This will be displayed in invitations and reports</span>
-			</label>
-		</div>
+		<TextInput
+			v-model="familyData.name"
+			label="Family Name"
+			placeholder="Enter your family name (e.g., The Johnson Family)"
+			:error="errors.familyName"
+			helpText="This will be displayed in invitations and reports"
+			maxlength="50"
+		/>
 
 		<!-- Family Description -->
-		<div class="form-control grid">
-			<label class="label">
-				<span class="label-text font-semibold">Family Description</span>
-			</label>
-			<textarea
-				v-model="familyData.description"
-				placeholder="Tell us about your family..."
-				class="textarea textarea-bordered w-100"
-				rows="5"
-				maxlength="200"
-			></textarea>
-			<label class="label">
-				<span class="label-text-alt">{{ familyData.description?.length || 0 }}/200 characters</span>
-			</label>
-		</div>
-
-		<!-- Time Zone -->
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Time Zone</span>
-			</label>
-			<select v-model="familyData.timezone" class="select select-bordered w-full">
-				<option value="">Select your time zone</option>
-				<option
-					v-for="tz in timezones"
-					:key="tz.value"
-					:value="tz.value"
-				>
-					{{ tz.label }}
-				</option>
-			</select>
-		</div>
-
-		<!-- Privacy Settings -->
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Privacy Settings</span>
-			</label>
-			<div class="space-y-3">
-				<label class="label cursor-pointer">
-					<input
-						type="checkbox"
-						v-model="familyData.allowPhotosInReports"
-						class="checkbox checkbox-primary"
-					/>
-					<span class="label-text">Allow family photos in reports</span>
-				</label>
-			</div>
-			<div class="space-y-3">
-				<label class="label cursor-pointer">
-					<input
-						type="checkbox"
-						v-model="familyData.shareAnonymousData"
-						class="checkbox checkbox-primary"
-					/>
-					<span class="label-text">Share anonymous data for research</span>
-				</label>
-			</div>
-			<div class="space-y-3">
-				<label class="label cursor-pointer">
-					<input
-						type="checkbox"
-						v-model="familyData.enableLocationTracking"
-						class="checkbox checkbox-primary"
-					/>
-					<span class="label-text">Enable location tracking for caregivers</span>
-				</label>
-			</div>
-		</div>
-
-		<!-- Emergency Contact -->
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Emergency Contact</span>
-			</label>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<input
-					type="text"
-					v-model="familyData.emergencyContact.name"
-					placeholder="Contact name"
-					class="input input-bordered"
-				/>
-				<input
-					type="tel"
-					v-model="familyData.emergencyContact.phone"
-					placeholder="Phone number"
-					class="input input-bordered"
-				/>
-			</div>
-		</div>
+		<TextInput
+			v-model="familyData.description"
+			type="textarea"
+			label="Family Description"
+			placeholder="Tell us about your family..."
+			:rows="5"
+			maxlength="200"
+			showCharCount
+		/>
 
 		<!-- Action Buttons -->
 		<div class="flex mt-4">
@@ -137,6 +47,8 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import TextInput from '@/components/ui/TextInput.vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
 
 const props = defineProps({
 	family: {

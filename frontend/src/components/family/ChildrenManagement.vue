@@ -46,19 +46,12 @@
 		>
 			<div class="flex items-center gap-4">
 				<!-- Child Avatar -->
-				<div class="avatar"
-					 :class="child.status === 'active' ? 'avatar-online' : 'avatar-offline'">
-					<div
-						class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none bg-primary text-primary-content overflow-hidden"
-					>
-						<!-- Show image if avatarUrl exists -->
-						<img v-if="child.avatarUrl" :src="MediaService.getAvatarUrl(child.avatarUrl)" :alt="child.firstName || child.name" />
-						<!-- Show initials if no avatarUrl -->
-						<span v-else class="text-2xl font-bold flex items-center justify-center w-full h-full">
-							{{ (child.firstName ? child.firstName.charAt(0) : (child.name ? child.name.charAt(0) : '?')) }}
-						</span>
-					</div>
-				</div>
+				<Avatar
+					:src="child.avatarUrl"
+					:name="child.firstName && child.lastName ? `${child.firstName} ${child.lastName}` : (child.name || 'Child')"
+					size="lg"
+					bgColor="6366f1"
+				/>
 
 				<!-- Child Information -->
 				<div class="flex-1">
@@ -66,12 +59,6 @@
 						<h3 class="font-bold text-lg">
 							{{ child.firstName && child.lastName ? `${child.firstName} ${child.lastName}` : child.name }}
 						</h3>
-						<div
-							class="badge badge-sm"
-							:class="child.status === 'active' ? 'badge-success' : 'badge-warning'"
-						>
-							{{ child.status }}
-						</div>
 					</div>
 					<div class="text-sm text-base-content/70 space-y-1">
 						<p><strong>Born:</strong> {{ formatDate(child.birthDate) }} ({{ getAge(child.birthDate) }})</p>
@@ -127,100 +114,59 @@
 			<form @submit.prevent="saveChild" class="space-y-4">
 				<!-- Basic Information -->
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">First Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="childForm.firstName"
-							placeholder="Enter child's first name"
-							class="input input-bordered"
-							:class="{ 'input-error': childErrors.firstName }"
-							required
-						/>
-						<label class="label" v-if="childErrors.firstName">
-							<span class="label-text-alt text-error">{{ childErrors.firstName }}</span>
-						</label>
-					</div>
+					<TextInput
+						v-model="childForm.firstName"
+						label="First Name *"
+						placeholder="Enter child's first name"
+						:error="childErrors.firstName"
+						required
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Last Name *</span>
-						</label>
-						<input
-							type="text"
-							v-model="childForm.lastName"
-							placeholder="Enter child's last name"
-							class="input input-bordered"
-							:class="{ 'input-error': childErrors.lastName }"
-							required
-						/>
-						<label class="label" v-if="childErrors.lastName">
-							<span class="label-text-alt text-error">{{ childErrors.lastName }}</span>
-						</label>
-					</div>
+					<TextInput
+						v-model="childForm.lastName"
+						label="Last Name *"
+						placeholder="Enter child's last name"
+						:error="childErrors.lastName"
+						required
+					/>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Birth Date *</span>
-						</label>
-						<input
-							type="date"
-							v-model="childForm.birthDate"
-							class="input input-bordered"
-							:class="{ 'input-error': childErrors.birthDate }"
-							:max="today"
-							required
-						/>
-						<label class="label" v-if="childErrors.birthDate">
-							<span class="label-text-alt text-error">{{ childErrors.birthDate }}</span>
-						</label>
-					</div>
+					<TextInput
+						v-model="childForm.birthDate"
+						type="date"
+						label="Birth Date *"
+						:error="childErrors.birthDate"
+						:max="today"
+						required
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Gender</span>
-						</label>
-						<select v-model="childForm.gender" class="select select-bordered">
-							<option value="">Select gender</option>
-							<option value="male">Male</option>
-							<option value="female">Female</option>
-							<option value="other">Other</option>
-						</select>
-					</div>
+					<SelectInput
+						v-model="childForm.gender"
+						label="Gender"
+						placeholder="Select gender"
+						:options="genderOptions"
+					/>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Birth Weight (kg)</span>
-						</label>
-						<input
-							type="number"
-							v-model="childForm.birthWeightKg"
-							placeholder="e.g., 3.5"
-							class="input input-bordered"
-							step="0.01"
-							min="0"
-						/>
-					</div>
+					<TextInput
+						v-model="childForm.birthWeightKg"
+						type="number"
+						label="Birth Weight (kg)"
+						placeholder="e.g., 3.5"
+						step="0.01"
+						min="0"
+					/>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Birth Height (cm)</span>
-						</label>
-						<input
-							type="number"
-							v-model="childForm.birthHeightCm"
-							placeholder="e.g., 50"
-							class="input input-bordered"
-							step="0.1"
-							min="0"
-						/>
-					</div>
+					<TextInput
+						v-model="childForm.birthHeightCm"
+						type="number"
+						label="Birth Height (cm)"
+						placeholder="e.g., 50"
+						step="0.1"
+						min="0"
+					/>
 				</div>
 				
 				<!-- Avatar Upload Section -->
@@ -231,15 +177,12 @@
 					
 					<div class="flex items-center gap-4">
 						<!-- Avatar Preview -->
-						<div class="avatar">
-							<div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center overflow-hidden">
-								<img v-if="avatarPreview" :src="avatarPreview" alt="Avatar Preview" class="w-full h-full object-cover" />
-								<img v-else-if="childForm.avatarUrl" :src="MediaService.getAvatarUrl(childForm.avatarUrl)" alt="Current Avatar" class="w-full h-full object-cover" />
-								<span v-else class="text-3xl font-bold text-primary-content">
-									{{ childForm.firstName ? childForm.firstName.charAt(0) : '?' }}
-								</span>
-							</div>
-						</div>
+						<Avatar
+							:src="avatarPreview || childForm.avatarUrl"
+							:name="childForm.firstName && childForm.lastName ? `${childForm.firstName} ${childForm.lastName}` : (childForm.firstName || 'Child')"
+							size="xl"
+							bgColor="6366f1"
+						/>
 						
 						<!-- Upload Controls -->
 						<div class="flex-1">
@@ -258,20 +201,15 @@
 
 
 				<!-- Additional Information -->
-				<div class="form-control grid">
-					<label class="label">
-						<span class="label-text">Notes</span>
-					</label>
-					<textarea
-						v-model="childForm.notes"
-						placeholder="Any special notes about your child..."
-						class="textarea textarea-bordered h-20"
-						maxlength="500"
-					></textarea>
-					<label class="label">
-						<span class="label-text-alt">{{ childForm.notes?.length || 0 }}/500 characters</span>
-					</label>
-				</div>
+				<TextInput
+					v-model="childForm.notes"
+					type="textarea"
+					label="Notes"
+					placeholder="Any special notes about your child..."
+					maxlength="500"
+					:rows="5"
+					showCharCount
+				/>
 
 				<!-- Status -->
 				<div class="form-control">
@@ -351,6 +289,9 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import ChildrenService from '@/services/children.service'
 import MediaService from '@/services/media.service'
 import { usePermissions, Permission } from '@/services/permissions.service'
+import TextInput from '@/components/ui/TextInput.vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
+import Avatar from '@/components/ui/Avatar.vue'
 
 const props = defineProps({
 	familyId: {
@@ -379,6 +320,14 @@ const { hasPermission } = usePermissions()
 const today = computed(() => {
 	return new Date().toISOString().split('T')[0]
 })
+
+// Options for select inputs
+const genderOptions = [
+  { value: '', label: 'Select gender' },
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' }
+]
 
 // Form data
 const childForm = reactive({

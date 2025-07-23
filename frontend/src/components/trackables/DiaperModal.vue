@@ -6,62 +6,41 @@
     @close="resetForm"
   >
     <form class="space-y-4">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Diaper Type</span>
-        </label>
-        <select v-model="form.type" class="select select-bordered w-full">
-          <option :value="DiaperType.WET">Wet</option>
-          <option :value="DiaperType.DIRTY">Dirty</option>
-          <option :value="DiaperType.BOTH">Both</option>
-        </select>
-      </div>
+      <SelectInput
+        v-model="form.type"
+        label="Diaper Type"
+        :options="diaperTypeOptions"
+      />
 
-      <div v-if="form.type !== DiaperType.WET" class="form-control">
-        <label class="label">
-          <span class="label-text">Consistency</span>
-        </label>
-        <input
-          type="text"
+      <div v-if="form.type !== DiaperType.WET">
+        <TextInput
           v-model="form.consistency"
-          class="input input-bordered w-full"
+          label="Consistency"
           placeholder="e.g., Soft, Hard, Runny"
         />
       </div>
 
-      <div v-if="form.type !== DiaperType.WET" class="form-control">
-        <label class="label">
-          <span class="label-text">Color</span>
-        </label>
-        <input
-          type="text"
+      <div v-if="form.type !== DiaperType.WET">
+        <TextInput
           v-model="form.color"
-          class="input input-bordered w-full"
+          label="Color"
           placeholder="e.g., Yellow, Green, Brown"
         />
       </div>
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Date & Time</span>
-        </label>
-        <input
-          type="datetime-local"
-          v-model="form.occurredAt"
-          class="input input-bordered w-full"
-        />
-      </div>
+      <TextInput
+        v-model="form.occurredAt"
+        type="datetime-local"
+        label="Date & Time"
+      />
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Notes</span>
-        </label>
-        <textarea
-          v-model="form.notes"
-          class="textarea textarea-bordered h-24"
-          placeholder="Add any additional notes here..."
-        ></textarea>
-      </div>
+      <TextInput
+        v-model="form.notes"
+        type="textarea"
+        label="Notes"
+        placeholder="Add any additional notes here..."
+        :rows="4"
+      />
     </form>
 
     <div v-if="error" class="alert alert-error mt-4">
@@ -74,6 +53,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import TrackableModal from './TrackableModal.vue';
+import TextInput from '@/components/ui/TextInput.vue';
+import SelectInput from '@/components/ui/SelectInput.vue';
 import diapersService from '@/services/diapers.service';
 import { DiaperType } from '@/interfaces/trackable.interface';
 
@@ -88,6 +69,13 @@ const emit = defineEmits(['created', 'updated']);
 
 const modal = ref(null);
 const error = ref('');
+
+// Options for select inputs
+const diaperTypeOptions = [
+  { value: DiaperType.WET, label: 'Wet' },
+  { value: DiaperType.DIRTY, label: 'Dirty' },
+  { value: DiaperType.BOTH, label: 'Both' }
+];
 
 const defaultForm = {
   childId: props.childId,

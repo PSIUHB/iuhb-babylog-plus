@@ -4,7 +4,7 @@
 			<!-- Avatar Section -->
 			<div class="avatar avatar-online">
 				<div class="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-					<img :src="displayAvatar" :alt="userProfile.name" />
+					<img :src="displayAvatar" :alt="displayName" />
 				</div>
 			</div>
 			
@@ -28,37 +28,8 @@
 
 			<!-- User Info -->
 			<div class="mt-6 w-full">
-				<h2 class="text-2xl font-bold">{{ userProfile.name }}</h2>
-				<p class="text-base-content/70">{{ userProfile.email }}</p>
-				<div class="badge badge-primary mt-2">{{ userProfile.role }}</div>
-			</div>
-
-			<!-- Quick Stats -->
-			<div class="stats stats-vertical shadow-none bg-transparent mt-6 w-full">
-				<div class="stat px-0 py-2">
-					<div class="stat-title text-xs">Member Since</div>
-					<div class="stat-value text-sm">{{ formatDate(userProfile.memberSince) }}</div>
-				</div>
-				<div class="stat px-0 py-2">
-					<div class="stat-title text-xs">Events Logged</div>
-					<div class="stat-value text-sm text-primary">{{ userProfile.eventsLogged }}</div>
-				</div>
-				<div class="stat px-0 py-2">
-					<div class="stat-title text-xs">Family Members</div>
-					<div class="stat-value text-sm text-secondary">{{ userProfile.familyMembers }}</div>
-				</div>
-			</div>
-
-			<!-- Account Status -->
-			<div class="w-full mt-4">
-				<div class="flex items-center justify-between p-3 bg-success/10 rounded-lg">
-					<div class="flex items-center gap-2">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span class="text-sm font-medium">Account Verified</span>
-					</div>
-				</div>
+				<h2 class="text-2xl font-bold">{{ displayName }}</h2>
+				<p class="text-base-content/70">{{ authStore.user?.email }}</p>
 			</div>
 		</div>
 
@@ -93,28 +64,6 @@
 								<span class="label-text-alt">Max size: 5MB. Formats: JPG, PNG, GIF</span>
 							</label>
 						</div>
-
-						<div class="divider">OR</div>
-
-						<!-- Avatar Options -->
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Choose Avatar</span>
-							</label>
-							<div class="grid grid-cols-4 gap-2">
-								<div
-									v-for="avatar in avatarOptions"
-									:key="avatar.id"
-									class="avatar cursor-pointer hover:scale-110 transition-transform"
-									:class="{ 'ring ring-primary': previewAvatar === avatar.url }"
-									@click="selectAvatar(avatar.url)"
-								>
-									<div class="w-12 h-12 rounded-full">
-										<img :src="avatar.url" :alt="`Avatar ${avatar.id}`" />
-									</div>
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
 
@@ -144,51 +93,39 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AuthService from '@/services/auth.service'
 import MediaService from '@/services/media.service'
+import { useAuthStore } from '@/stores/auth.store'
 
 const emit = defineEmits(['avatar-updated'])
+
+// Store
+const authStore = useAuthStore()
 
 // Refs
 const avatarModal = ref(null)
 const isUploading = ref(false)
 const previewAvatar = ref(null)
 const selectedFile = ref(null)
-const loading = ref(true)
+const loading = ref(false)
 const error = ref(null)
 
-// User profile data
-const userProfile = reactive({
-	name: '',
-	email: '',
-	role: 'Family Member',
-	avatar: '',
-	memberSince: '',
-	eventsLogged: 0,
-	familyMembers: 0
+// Computed properties
+const displayName = computed(() => {
+	if (authStore.user?.firstName && authStore.user?.lastName) {
+		return `${authStore.user.firstName} ${authStore.user.lastName}`
+	}
+	return authStore.user?.name || 'User'
 })
 
-// Computed properties
 const displayAvatar = computed(() => {
-	if (userProfile.avatar) {
-		return MediaService.getAvatarUrl(userProfile.avatar)
+	if (authStore.user?.avatarUrl) {
+		return MediaService.getAvatarUrl(authStore.user.avatarUrl)
 	}
 	// Generate initials avatar if no avatar is set
-	return MediaService.getInitialsAvatar(`${userProfile.name}`)
+	return MediaService.getInitialsAvatar(displayName.value)
 })
-
-// Avatar options with UI Avatars
-const avatarOptions = ref([
-	{ id: 1, url: 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff' },
-	{ id: 2, url: 'https://ui-avatars.com/api/?name=User&background=f43f5e&color=fff' },
-	{ id: 3, url: 'https://ui-avatars.com/api/?name=User&background=10b981&color=fff' },
-	{ id: 4, url: 'https://ui-avatars.com/api/?name=User&background=f59e0b&color=fff' },
-	{ id: 5, url: 'https://ui-avatars.com/api/?name=User&background=8b5cf6&color=fff' },
-	{ id: 6, url: 'https://ui-avatars.com/api/?name=User&background=ec4899&color=fff' },
-	{ id: 7, url: 'https://ui-avatars.com/api/?name=User&background=14b8a6&color=fff' },
-	{ id: 8, url: 'https://ui-avatars.com/api/?name=User&background=f97316&color=fff' }
-])
 
 // Fetch user profile
 const fetchUserProfile = async () => {
@@ -196,26 +133,7 @@ const fetchUserProfile = async () => {
 	error.value = null
 	
 	try {
-		const profile = await AuthService.getProfile()
-		
-		// Update user profile data
-		userProfile.name = `${profile.firstName} ${profile.lastName}`
-		userProfile.email = profile.email
-		userProfile.avatar = profile.avatarUrl || ''
-		
-		// Set member since date from profile id (contains timestamp)
-		if (profile.id) {
-			const timestamp = parseInt(profile.id.substring(0, 8), 16) * 1000
-			userProfile.memberSince = new Date(timestamp).toISOString().split('T')[0]
-		} else {
-			userProfile.memberSince = new Date().toISOString().split('T')[0]
-		}
-		
-		// Update avatar options with user's name
-		avatarOptions.value = avatarOptions.value.map(option => ({
-			...option,
-			url: option.url.replace('name=User', `name=${encodeURIComponent(userProfile.name)}`)
-		}))
+		await authStore.fetchUserProfile()
 	} catch (err) {
 		console.error('Error fetching user profile:', err)
 		error.value = 'Failed to load profile'
@@ -225,13 +143,6 @@ const fetchUserProfile = async () => {
 }
 
 // Methods
-const formatDate = (dateString) => {
-	return new Date(dateString).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long'
-	})
-}
-
 const openAvatarModal = () => {
 	previewAvatar.value = displayAvatar.value
 	avatarModal.value?.showModal()
@@ -241,11 +152,6 @@ const closeAvatarModal = () => {
 	avatarModal.value?.close()
 	previewAvatar.value = null
 	selectedFile.value = null
-}
-
-const selectAvatar = (avatarUrl) => {
-	previewAvatar.value = avatarUrl
-	selectedFile.value = null // Clear any selected file
 }
 
 const handleFileUpload = (event) => {
@@ -294,14 +200,14 @@ const saveAvatar = async () => {
 			updatedProfile = await AuthService.updateProfile({ avatarUrl: previewAvatar.value })
 		}
 
-		// Update user profile with the response
-		if (updatedProfile) {
-			userProfile.avatar = updatedProfile.avatarUrl || ''
+		// Update auth store directly
+		if (updatedProfile && authStore.user) {
+			authStore.user.avatarUrl = updatedProfile.avatarUrl || ''
 		}
 
 		// Emit update event
 		emit('avatar-updated', {
-			avatar: userProfile.avatar,
+			avatar: authStore.user?.avatarUrl,
 			timestamp: new Date()
 		})
 
