@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import childrenService from '@/services/children.service'
 import { useFamilyStore } from '@/stores/family.store'
 import feedsService from '@/services/feeds.service'
@@ -73,6 +73,18 @@ const error = ref(null)
 const familyStore = useFamilyStore()
 
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+const connectedCaregivers = computed(() => familyStore.connectedCaregivers || [])
+const currentFamily = computed(() => familyStore.currentFamily)
+
+// Calculate active caregivers from connected users
+const activeCaregivers = computed(() => {
+  if (!currentFamily.value?.userFamilies) return 0
+
+  return currentFamily.value.userFamilies
+    .filter(uf => !uf.leftAt) // Only active members
+    .filter(uf => connectedCaregivers.value.includes(uf.userId)) // Only connected users
+    .length
+})
 
 // Setup automatic updates via WebSocket
 const { isUpdating: isAutoUpdating } = useAutoUpdate({
@@ -241,7 +253,7 @@ const fetchStats = async () => {
       // Count unique caregivers (users who created events)
       const uniqueCaregivers = new Set(allTrackables.map(item => item.createdBy))
 
-      // Update stats
+      // Use connected caregivers from WebSocket instead of event creators
       stats.value = {
         events: todayEvents.length,
         eventsDesc: todayEvents.length > yesterdayEvents.length 
@@ -251,8 +263,8 @@ const fetchStats = async () => {
             : 'Same as yesterday',
         sleep: (totalSleepMinutes / 60).toFixed(1),
         sleepDesc: `Combined for ${childrenResponse.length} ${childrenResponse.length === 1 ? 'baby' : 'babies'}`,
-        caregivers: uniqueCaregivers.size,
-        caregiversDesc: 'Currently active'
+        caregivers: activeCaregivers.value,
+        caregiversDesc: activeCaregivers.value === 1 ? 'Currently online' : 'Currently online'
       }
     } catch (err) {
       console.error('Error fetching stats:', err)
@@ -274,6 +286,26 @@ const useMockData = () => {
     caregiversDesc: 'Currently active'
   }
 }
+
+// Watch for changes in connected caregivers and update stats accordingly
+watch(connectedCaregivers, (newConnectedCaregivers, oldConnectedCaregivers) => {
+
+  // Update only the caregivers stat without refetching all data
+  if (stats.value.caregivers !== undefined) {
+    const newCount = activeCaregivers.value;
+    stats.value.caregivers = newCount;
+    stats.value.caregiversDesc = newCount === 1 ? 'Currently online' : 'Currently online';
+  }
+}, { deep: true })
+
+// Also watch for changes in currentFamily to ensure we have the latest user data
+watch(currentFamily, (newFamily, oldFamily) => {
+  if (newFamily && stats.value.caregivers !== undefined) {
+    const newCount = activeCaregivers.value;
+    stats.value.caregivers = newCount;
+    stats.value.caregiversDesc = newCount === 1 ? 'Currently online' : 'Currently online';
+  }
+}, { deep: true })
 
 onMounted(async () => {
   await fetchStats()

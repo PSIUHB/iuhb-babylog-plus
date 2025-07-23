@@ -69,7 +69,7 @@ const router = createRouter({
 });
 
 // Add navigation guards to protect routes that require authentication
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   // Routes that require authentication
   if (to.path.startsWith('/app') || to.path === '/create-family') {
     const token = localStorage.getItem('token');

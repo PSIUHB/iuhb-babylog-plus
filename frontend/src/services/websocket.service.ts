@@ -17,7 +17,6 @@ class WebSocketService {
     private maxReconnectAttempts = 5;
     private reconnectInterval = 5000; // 5 seconds
     private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-    private pingInterval: ReturnType<typeof setInterval> | null = null;
 
     public isConnected = ref(false);
     public isReconnecting = ref(false);
@@ -55,8 +54,6 @@ class WebSocketService {
 
         this.lastError.value = null;
 
-        // Log token information (without exposing the full token)
-        const tokenPreview = authToken.substring(0, 10) + '...' + authToken.substring(authToken.length - 5);
 
         // Fix: Remove /api/v1 from WebSocket URL - WebSocket server runs on base URL
         let serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -85,16 +82,9 @@ class WebSocketService {
             autoConnect: true,
             // CORS and connection settings
             withCredentials: true,
-            // Polling configuration
-            polling: {
-                extraHeaders: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            }
         });
 
         this.setupEventListeners();
-        this.startPing();
     }
 
     private setupEventListeners(): void {
@@ -125,7 +115,6 @@ class WebSocketService {
 
         this.socket.on('disconnect', (reason) => {
             this.isConnected.value = false;
-            this.stopPing();
 
             // Different handling based on disconnect reason
             if (reason === 'io client disconnect') {
@@ -173,7 +162,7 @@ class WebSocketService {
             }
         });
 
-        this.socket.on('authentication_failed', (data) => {
+        this.socket.on('authentication_failed', (_data) => {
             this.handleAuthError();
         });
 
@@ -273,28 +262,7 @@ class WebSocketService {
         }, delay);
     }
 
-    private startPing(): void {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-        }
-
-        this.pingInterval = setInterval(() => {
-            if (this.socket?.connected) {
-                this.socket.emit('ping');
-            }
-        }, 25000); // Reduced to 25 seconds
-    }
-
-    private stopPing(): void {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
-        }
-    }
-
     disconnect(): void {
-
-        this.stopPing();
 
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
@@ -341,6 +309,14 @@ class WebSocketService {
             this.socket.emit('join-family', { familyId });
         }
     }
+
+    // Request initial connected caregivers status
+    requestConnectedCaregivers(familyId?: string): void {
+        if (this.socket?.connected) {
+            this.socket.emit('request-connected-caregivers', { familyId });
+        }
+    }
+
     // Computed properties for Vue components
     get connectionStatus() {
         return computed(() => {

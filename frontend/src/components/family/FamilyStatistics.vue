@@ -63,7 +63,12 @@
 						<div class="flex items-center gap-3">
 							<div class="avatar">
 								<div class="w-10 h-10 rounded-full">
-									<img :src="statistics.mostActiveCaregiver.avatar" :alt="statistics.mostActiveCaregiver.name" />
+									<img 
+										:src="statistics.mostActiveCaregiver.avatar 
+											? MediaService.getAvatarUrl(statistics.mostActiveCaregiver.avatar) 
+											: MediaService.getInitialsAvatar(statistics.mostActiveCaregiver.name)" 
+										:alt="statistics.mostActiveCaregiver.name" 
+									/>
 								</div>
 							</div>
 							<div>
@@ -138,6 +143,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import StatisticsService from '@/services/statistics.service'
+import MediaService from '@/services/media.service'
 
 const props = defineProps({
 	familyId: {

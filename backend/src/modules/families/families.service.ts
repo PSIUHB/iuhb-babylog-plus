@@ -350,6 +350,14 @@ export class FamiliesService {
         }
     }
 
+    /**
+     * Get all families from database
+     * Used by WebSocket Gateway to send events to all family rooms
+     */
+    async getAllFamilies(): Promise<Family[]> {
+        return await this.familyRepository.find();
+    }
+
     private generateInviteCode(): string {
         return randomBytes(4).toString('hex').toUpperCase();
     }

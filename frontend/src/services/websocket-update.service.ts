@@ -26,7 +26,6 @@ class WebSocketUpdateService {
             return;
         }
 
-        console.log('Initializing WebSocket update service...');
         this.setupEventHandlers();
         this.isInitialized = true;
     }
@@ -40,83 +39,62 @@ class WebSocketUpdateService {
 
     private setupEventHandlers() {
         // Family Events
-        this.unsubscribeFunctions.push(
-            websocketService.on('family.updated', (data) => {
-                console.log('Auto-updating family data due to WebSocket event');
-                this.handleFamilyUpdated(data);
-            })
-        );
+        websocketService.on('family.updated', (data) => {
+            console.log('Auto-updating family data due to WebSocket event');
+            this.handleFamilyUpdated(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('family.member.joined', (data) => {
-                console.log('Auto-updating family members due to member join');
-                this.handleFamilyMemberChanged(data);
-            })
-        );
+        websocketService.on('family.member.joined', (data) => {
+            console.log('Auto-updating family members due to member join');
+            this.handleFamilyMemberChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('family.member.left', (data) => {
-                console.log('Auto-updating family members due to member leave');
-                this.handleFamilyMemberChanged(data);
-            })
-        );
+        websocketService.on('family.member.left', (data) => {
+            console.log('Auto-updating family members due to member leave');
+            this.handleFamilyMemberChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('family.member.updated', (data) => {
-                console.log('Auto-updating family members due to role change');
-                this.handleFamilyMemberChanged(data);
-            })
-        );
+        websocketService.on('family.member.updated', (data) => {
+            console.log('Auto-updating family members due to role change');
+            this.handleFamilyMemberChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('family.member.removed', (data) => {
-                console.log('Auto-updating family members due to member removal');
-                this.handleFamilyMemberChanged(data);
-            })
-        );
+        websocketService.on('family.member.removed', (data) => {
+            console.log('Auto-updating family members due to member removal');
+            this.handleFamilyMemberChanged(data);
+        });
 
         // Child Events
-        this.unsubscribeFunctions.push(
-            websocketService.on('child.created', (data) => {
-                console.log('Auto-updating children list due to new child');
-                this.handleChildChanged(data);
-            })
-        );
+        websocketService.on('child.created', (data) => {
+            console.log('Auto-updating children list due to new child');
+            this.handleChildChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('child.updated', (data) => {
-                console.log('Auto-updating child data due to changes');
-                this.handleChildChanged(data);
-            })
-        );
+        websocketService.on('child.updated', (data) => {
+            console.log('Auto-updating child data due to changes');
+            this.handleChildChanged(data);
+        });
 
         // Trackable Events
-        this.unsubscribeFunctions.push(
-            websocketService.on('trackable.created', (data) => {
-                console.log('Auto-updating trackables due to new entry');
-                this.handleTrackableChanged(data);
-            })
-        );
+        websocketService.on('trackable.created', (data) => {
+            console.log('Auto-updating trackables due to new entry');
+            this.handleTrackableChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('trackable.updated', (data) => {
-                console.log('Auto-updating trackables due to changes');
-                this.handleTrackableChanged(data);
-            })
-        );
+        websocketService.on('trackable.updated', (data) => {
+            console.log('Auto-updating trackables due to changes');
+            this.handleTrackableChanged(data);
+        });
 
-        this.unsubscribeFunctions.push(
-            websocketService.on('trackable.deleted', (data) => {
-                console.log('Auto-updating trackables due to deletion');
-                this.handleTrackableChanged(data);
-            })
-        );
+        websocketService.on('trackable.deleted', (data) => {
+            console.log('Auto-updating trackables due to deletion');
+            this.handleTrackableChanged(data);
+        });
     }
 
     private async handleFamilyUpdated(data: any) {
         try {
             const familyStore = useFamilyStore();
-            const authStore = useAuthStore();
 
             // Refresh the specific family if it's the current one
             if (familyStore.getCurrentFamilyId === data.familyId) {

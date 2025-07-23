@@ -49,10 +49,13 @@
 				<div class="avatar"
 					 :class="child.status === 'active' ? 'avatar-online' : 'avatar-offline'">
 					<div
-						class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none bg-primary text-primary-content"
+						class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none bg-primary text-primary-content overflow-hidden"
 					>
-						<span class="text-2xl font-bold flex items-center justify-center w-full h-full">
-							{{ (child.firstName ? child.firstName.charAt(0) : (child.name ? child.firstName.charAt(0) : '?')) }}
+						<!-- Show image if avatarUrl exists -->
+						<img v-if="child.avatarUrl" :src="MediaService.getAvatarUrl(child.avatarUrl)" :alt="child.firstName || child.name" />
+						<!-- Show initials if no avatarUrl -->
+						<span v-else class="text-2xl font-bold flex items-center justify-center w-full h-full">
+							{{ (child.firstName ? child.firstName.charAt(0) : (child.name ? child.name.charAt(0) : '?')) }}
 						</span>
 					</div>
 				</div>
@@ -219,6 +222,39 @@
 						/>
 					</div>
 				</div>
+				
+				<!-- Avatar Upload Section -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text">Child Avatar</span>
+					</label>
+					
+					<div class="flex items-center gap-4">
+						<!-- Avatar Preview -->
+						<div class="avatar">
+							<div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center overflow-hidden">
+								<img v-if="avatarPreview" :src="avatarPreview" alt="Avatar Preview" class="w-full h-full object-cover" />
+								<img v-else-if="childForm.avatarUrl" :src="MediaService.getAvatarUrl(childForm.avatarUrl)" alt="Current Avatar" class="w-full h-full object-cover" />
+								<span v-else class="text-3xl font-bold text-primary-content">
+									{{ childForm.firstName ? childForm.firstName.charAt(0) : '?' }}
+								</span>
+							</div>
+						</div>
+						
+						<!-- Upload Controls -->
+						<div class="flex-1">
+							<input
+								type="file"
+								class="file-input file-input-bordered w-full max-w-xs"
+								accept="image/*"
+								@change="handleAvatarUpload"
+							/>
+							<div class="text-xs text-base-content/70 mt-1">
+								Max size: 5MB. Formats: JPG, PNG, GIF
+							</div>
+						</div>
+					</div>
+				</div>
 
 
 				<!-- Additional Information -->
@@ -313,6 +349,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import ChildrenService from '@/services/children.service'
+import MediaService from '@/services/media.service'
 import { usePermissions, Permission } from '@/services/permissions.service'
 
 const props = defineProps({
@@ -353,8 +390,14 @@ const childForm = reactive({
 	birthWeightKg: null,
 	birthHeightCm: null,
 	notes: '',
-	isActive: true
+	isActive: true,
+	avatarUrl: '',
+	avatarFile: null
 })
+
+// Preview for avatar upload
+const avatarPreview = ref('')
+const isUploadingAvatar = ref(false)
 
 // Children data
 const children = ref([])
@@ -469,6 +512,12 @@ const editChild = (child) => {
 	childForm.birthHeightCm = child.birthHeightCm !== undefined ? child.birthHeightCm : null
 	childForm.notes = child.notes
 	childForm.isActive = child.status === 'active'
+	
+	// Set avatar URL if available
+	childForm.avatarUrl = child.avatarUrl || ''
+	childForm.avatarFile = null
+	avatarPreview.value = ''
+	
 	childModal.value?.showModal()
 }
 
@@ -531,14 +580,29 @@ const saveChild = async () => {
 			status: childForm.isActive ? 'active' : 'inactive',
 			// Convert string values to numbers for numeric fields
 			birthWeightKg: childForm.birthWeightKg !== null ? Number(childForm.birthWeightKg) : null,
-			birthHeightCm: childForm.birthHeightCm !== null ? Number(childForm.birthHeightCm) : null
+			birthHeightCm: childForm.birthHeightCm !== null ? Number(childForm.birthHeightCm) : null,
+			// Include avatarUrl if it exists and no new file is being uploaded
+			avatarUrl: childForm.avatarUrl && !childForm.avatarFile ? childForm.avatarUrl : undefined
 		}
+
+		let response;
 
 		if (isEditing.value) {
 			// Update existing child
-			const response = await ChildrenService.updateChild(childForm.id, childData)
+			response = await ChildrenService.updateChild(childForm.id, childData)
 
-			console.log(childData);
+			// If there's a new avatar file, upload it
+			if (childForm.avatarFile) {
+				isUploadingAvatar.value = true
+				try {
+					response = await ChildrenService.uploadAvatar(childForm.id, childForm.avatarFile)
+				} catch (avatarError) {
+					console.error('Error uploading avatar:', avatarError)
+					// Continue with the save even if avatar upload fails
+				} finally {
+					isUploadingAvatar.value = false
+				}
+			}
 
 			// Update local state
 			const index = children.value.findIndex(c => c.id === childForm.id)
@@ -549,7 +613,20 @@ const saveChild = async () => {
 			emit('child-updated', response)
 		} else {
 			// Add new child
-			const response = await ChildrenService.createChild(props.familyId, childData)
+			response = await ChildrenService.createChild(props.familyId, childData)
+
+			// If there's an avatar file, upload it
+			if (childForm.avatarFile) {
+				isUploadingAvatar.value = true
+				try {
+					response = await ChildrenService.uploadAvatar(response.id, childForm.avatarFile)
+				} catch (avatarError) {
+					console.error('Error uploading avatar:', avatarError)
+					// Continue with the save even if avatar upload fails
+				} finally {
+					isUploadingAvatar.value = false
+				}
+			}
 
 			// Update local state
 			children.value.push(response)
@@ -631,6 +708,33 @@ const toggleChildStatus = async (child) => {
 	}
 }
 
+const handleAvatarUpload = (event) => {
+	const file = event.target.files[0]
+	if (!file) return
+	
+	// Validate file size (5MB)
+	if (file.size > 5 * 1024 * 1024) {
+		alert('File size must be less than 5MB')
+		return
+	}
+	
+	// Validate file type
+	if (!file.type.startsWith('image/')) {
+		alert('Please select an image file')
+		return
+	}
+	
+	// Store the file for upload
+	childForm.avatarFile = file
+	
+	// Create preview URL
+	const reader = new FileReader()
+	reader.onload = (e) => {
+		avatarPreview.value = e.target.result
+	}
+	reader.readAsDataURL(file)
+}
+
 const resetChildForm = () => {
 	childForm.id = null
 	childForm.firstName = ''
@@ -642,6 +746,9 @@ const resetChildForm = () => {
 	childForm.birthHeightCm = null
 	childForm.notes = ''
 	childForm.isActive = true
+	childForm.avatarUrl = ''
+	childForm.avatarFile = null
+	avatarPreview.value = ''
 	childErrors.value = {}
 }
 

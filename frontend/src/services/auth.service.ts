@@ -1,5 +1,5 @@
 import api from './api';
-import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile } from '@/interfaces/auth.interface';
+import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile, UpdateUserDto } from '@/interfaces/auth.interface';
 import type { IAuthService } from '@/interfaces';
 
 class AuthService implements IAuthService {
@@ -36,6 +36,49 @@ class AuthService implements IAuthService {
    */
   async getProfile(): Promise<UserProfile> {
     return api.get('/auth/profile');
+  }
+
+  /**
+   * Update the current user's profile
+   */
+  async updateProfile(userData: UpdateUserDto): Promise<UserProfile> {
+    return api.patch('/auth/profile', userData);
+  }
+
+  /**
+   * Upload avatar for the current user
+   */
+  async uploadAvatar(file: File): Promise<UserProfile> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
+    const token = localStorage.getItem('token');
+
+    try {
+      // Upload the file to the media endpoint
+      const uploadResponse = await fetch(`${apiUrl}/media/upload/avatars`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || 'Avatar upload failed');
+      }
+
+      // Get the uploaded file URL from the response
+      const uploadResult = await uploadResponse.json();
+      
+      // Update the user profile with the new avatar URL
+      return this.updateProfile({ avatarUrl: uploadResult.url });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      throw error;
+    }
   }
 
   /**

@@ -2,7 +2,7 @@ import type { Child, ChildCreateDto, ChildUpdateDto } from './child.interface';
 import type { Caregiver, CaregiverInviteDto, CaregiverUpdateDto } from './caregiver.interface';
 import type { Family, FamilyCreateDto, FamilyUpdateDto, FamilyWithMembersDto } from './family.interface';
 import type { InvitationCreateDto } from './invitation.interface';
-import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile } from './auth.interface';
+import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile, UpdateUserDto } from './auth.interface';
 
 /**
  * Interface for the API service
@@ -23,6 +23,8 @@ export interface IAuthService {
   login(credentials: LoginRequest): Promise<AuthResponse>;
   logout(): void;
   getProfile(): Promise<UserProfile>;
+  updateProfile(userData: UpdateUserDto): Promise<UserProfile>;
+  uploadAvatar(file: File): Promise<UserProfile>;
   isLoggedIn(): boolean;
   getToken(): string | null;
   activateAccount(token: string): Promise<any>;
@@ -51,9 +53,6 @@ export interface ICaregiversService {
   removeCaregiver(familyId: string, userId: string): Promise<any>;
   resendInvitation(familyId: string, email: string): Promise<any>;
 }
-
-import { MilestoneCategory } from './milestone.interface';
-
 
 /**
  * Interface for the Families service

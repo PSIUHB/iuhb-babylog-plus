@@ -56,7 +56,6 @@ const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
 const { isUpdating: isAutoUpdating } = useAutoUpdate({
   familyId: computed(() => currentFamilyId.value),
   refreshFn: async () => {
-    console.log('Recent activity data changed via WebSocket, refreshing...')
     await fetchActivities()
   }
 })
@@ -84,8 +83,6 @@ import { TrackableType } from '@/enums/trackable-type.enum'
 const formatEventAction = (event) => {
   // Extract data from event - ensure we have a data object even if it's undefined
   const data = event.data || {};
-
-  console.log(event);
 
   switch (event.type) {
     case TrackableType.FEEDING:
@@ -246,7 +243,6 @@ const fetchActivities = async () => {
             })
           }
         } catch (err) {
-          console.error('Error fetching milestones:', err)
           // Continue with other activities even if milestones fail
         }
       }
@@ -274,7 +270,6 @@ const fetchActivities = async () => {
         }
       })
     } catch (err) {
-      console.error('Error fetching activities:', err)
       error.value = 'Failed to load activities'
     } finally {
       loading.value = false

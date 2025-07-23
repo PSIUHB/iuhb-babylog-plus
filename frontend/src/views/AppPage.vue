@@ -24,13 +24,6 @@ onMounted(() => {
   }
 });
 
-const logout = () => {
-  // Use the auth store to logout
-  authStore.logout();
-  // Redirect to login page
-  router.push('/auth/login');
-};
-
 </script>
 
 <template>

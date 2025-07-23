@@ -48,7 +48,7 @@ const createFamily = async () => {
     isLoading.value = true;
     
     // Create the family
-    const response = await familyStore.createFamily({
+    await familyStore.createFamily({
       name: familyName.value.trim()
     });
     

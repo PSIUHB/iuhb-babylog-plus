@@ -53,17 +53,9 @@ import { TrackablesModule } from '@/modules/trackables/trackables.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
-    },{
-      rootPath: join(__dirname, '..', 'frontend', 'dist'),
-      serveRoot: '/',
-      exclude: ['/api*'],
-      serveStaticOptions: {
-        index: false,
-      },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'frontend', 'dist'),
-      exclude: ['/api*', '/uploads*'],
+      rootPath: join(__dirname, '..', 'frontend', 'dist')
     }),
     AuthModule,
     UsersModule,
@@ -78,5 +70,7 @@ import { TrackablesModule } from '@/modules/trackables/trackables.module';
     MilestonesModule,
     TrackablesModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

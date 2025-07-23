@@ -289,9 +289,6 @@ export class EventsService {
             // Get all milestones from the database grouped by category
             const allMilestones = await this.milestonesService.getAllByCategory();
 
-            // Debug logging
-            console.log('All milestones from service:', allMilestones);
-
             // Check if allMilestones is null or undefined
             if (!allMilestones) {
                 console.error('getAllByCategory returned null/undefined');
@@ -333,8 +330,6 @@ export class EventsService {
                     };
                 });
             }
-
-            console.log('Final result:', result);
             return result;
         } catch (error) {
             console.error('Error in getChildMilestones:', error);

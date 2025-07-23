@@ -23,12 +23,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
 import { useWebSocket, useFamilyWebSocket, useChildrenWebSocket, useTrackablesWebSocket } from '@/composables/useWebSocket';
-import { useRouter } from 'vue-router';
 
 // Get WebSocket composables
 const {
-  isConnected,
-  isReconnecting,
   connectionStatus,
   statusMessage,
   lastError
@@ -37,8 +34,6 @@ const {
 const familySocket = useFamilyWebSocket();
 const childrenSocket = useChildrenWebSocket();
 const trackablesSocket = useTrackablesWebSocket();
-
-const router = useRouter();
 
 // Event handlers
 let unsubscribeFunctions: Array<() => void> = [];

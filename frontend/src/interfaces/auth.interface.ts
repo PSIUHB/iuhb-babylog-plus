@@ -39,3 +39,12 @@ export interface UserProfile {
   isActive?: boolean;
   familyId?: string;
 }
+
+export interface UpdateUserDto {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  avatarUrl?: string;
+  locale?: string;
+  timezone?: string;
+}

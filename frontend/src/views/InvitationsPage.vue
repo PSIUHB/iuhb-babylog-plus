@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import authService from '@/services/auth.service';
 
-const errorMessage = ref('');
 const invitationsError = ref('');
 const createFamilyError = ref('');
 const joinFamilyError = ref('');

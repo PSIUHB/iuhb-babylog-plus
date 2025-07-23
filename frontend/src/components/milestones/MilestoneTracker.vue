@@ -329,53 +329,6 @@ const saveMilestone = async () => {
   }
 };
 
-const deleteMilestoneAchievement = async (milestone: any) => {
-  if (!milestone.achieved) return;
-
-  // Debug: Log das milestone Objekt um zu sehen welche Eigenschaften verfügbar sind
-  console.log('Milestone object for deletion:', milestone);
-
-  // Prüfe verschiedene mögliche Event-ID Eigenschaften (eventId ist die korrekte Eigenschaft aus dem Backend)
-  const eventId = milestone.eventId || milestone.achievedEventId || milestone.id;
-
-  if (!eventId) {
-    console.error('No event ID found in milestone object:', milestone);
-    error.value = 'Cannot delete milestone: No event ID found.';
-    return;
-  }
-
-  const confirmed = confirm(`Are you sure you want to delete the achievement for "${milestone.milestone}"? This action cannot be undone.`);
-  if (!confirmed) return;
-
-  saving.value = true;
-
-  try {
-    console.log('Attempting to delete milestone event with ID:', eventId);
-    await milestoneService.deleteMilestoneEvent(eventId);
-    console.log('Successfully deleted milestone event');
-
-    // Clear any previous errors
-    error.value = null;
-
-    // Refresh milestones
-    await fetchMilestones();
-  } catch (err: any) {
-    console.error('Error deleting milestone achievement:', err);
-
-    // Bessere Fehlerbehandlung
-    if (err?.response?.status === 404) {
-      error.value = 'Milestone achievement not found. It may have already been deleted.';
-    } else if (err?.response?.status === 403) {
-      error.value = 'You do not have permission to delete this milestone achievement.';
-    } else if (err?.response?.data?.message) {
-      error.value = `Failed to delete: ${err.response.data.message}`;
-    } else {
-      error.value = 'Failed to delete milestone achievement. Please try again.';
-    }
-  } finally {
-    saving.value = false;
-  }
-};
 
 // Lifecycle
 onMounted(() => {

@@ -52,7 +52,7 @@
 				>
 					<div class="w-16 h-16 rounded-full">
 						<img
-							:src="caregiver.avatar || getDefaultAvatar(`${caregiver.firstName} ${caregiver.lastName}`)"
+							:src="caregiver.avatar ? MediaService.getAvatarUrl(caregiver.avatar) : getDefaultAvatar(`${caregiver.firstName} ${caregiver.lastName}`)"
 							:alt="`${caregiver.firstName} ${caregiver.lastName}`"
 						/>
 					</div>
@@ -369,6 +369,7 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import CaregiversService from '@/services/caregivers.service'
+import MediaService from '@/services/media.service'
 import { usePermissions, Permission } from '@/services/permissions.service'
 
 const props = defineProps({
@@ -519,8 +520,8 @@ const formatLastActive = (lastActive) => {
 }
 
 const getDefaultAvatar = (name) => {
-	// Generate a default avatar based on name initials
-	return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
+	// Use MediaService to generate an avatar with initials
+	return MediaService.getInitialsAvatar(name)
 }
 
 const openInviteModal = () => {

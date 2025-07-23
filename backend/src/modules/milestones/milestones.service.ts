@@ -82,14 +82,11 @@ export class MilestonesService {
   async getAllByCategory(): Promise<Record<MilestoneCategory, Milestone[]>> {
     try {
       let milestones = await this.findAll();
-      console.log('Found milestones in database:', milestones.length);
 
       // If no milestones found, try to seed the database
       if (!milestones || milestones.length === 0) {
-        console.warn('No milestones found in database. Attempting to seed milestones...');
         await this.seedMilestones();
         milestones = await this.findAll();
-        console.log('After seeding, found milestones:', milestones.length);
       }
 
       // Initialize with empty arrays for all categories to ensure consistent structure
@@ -111,14 +108,8 @@ export class MilestonesService {
         }
       });
 
-      // Log category counts for debugging
-      Object.entries(result).forEach(([category, items]) => {
-        console.log(`Category ${category}: ${items.length} milestones`);
-      });
-
       return result;
     } catch (error) {
-      console.error('Error in getAllByCategory:', error);
       // Return empty structure on error
       return {
         [MilestoneCategory.MOTOR_DEVELOPMENT]: [],
@@ -136,7 +127,6 @@ export class MilestonesService {
    */
   private async seedMilestones(): Promise<void> {
     try {
-      console.log('Seeding milestones from MILESTONES constant...');
 
       const milestonesToCreate: CreateMilestoneDto[] = [];
 

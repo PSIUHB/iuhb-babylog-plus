@@ -38,62 +38,170 @@ export class WebSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     afterInit(server: Server) {
         console.log('WebSocket Gateway initialized');
+
+        // Start the interval system after initialization
+        this.waitForAdapterAndStartInterval();
+    }
+
+    /**
+     * Waits for the Socket.IO adapter to be fully initialized and then starts the interval
+     */
+    private async waitForAdapterAndStartInterval() {
+        console.log('Starting connected caregivers event interval with simplified approach');
+
+        // Start the interval for sending connected caregivers events every 10 seconds
+        setInterval(() => {
+            this.sendActiveCaregivers();
+        }, 10000);
+
+        // Send initial event after a short delay
+        setTimeout(() => {
+            this.sendActiveCaregivers();
+        }, 2000);
+    }
+
+    /**
+     * Sends active caregivers information to each family room
+     * This method gets all families from DB and sends connected users info to their rooms
+     */
+    private async sendActiveCaregivers() {
+        try {
+            console.log('Checking active caregivers for all family rooms');
+
+            // Check if server is available
+            if (!this.server) {
+                console.log('Server not available');
+                return;
+            }
+
+            console.log(`Processing ${this.socketUsers.size} connected sockets from socketUsers map`);
+
+            // Get all families from database
+            const families = await this.familiesService.getAllFamilies();
+            console.log(`Found ${families.length} families in database`);
+
+            // For each family, check which users are connected and send event
+            for (const family of families) {
+                const familyId = family.id;
+                const connectedUserIds = new Set<string>();
+
+                // Check all connected sockets to see if any belong to this family's members
+                for (const [socketId, userId] of this.socketUsers.entries()) {
+                    // Check if this user is a member of this family
+                    try {
+                        const userFamily = await this.familiesService.getUserFamilyRole(userId, familyId);
+                        if (userFamily) {
+                            connectedUserIds.add(userId);
+                            console.log(`User ${userId} is connected and member of family ${familyId}`);
+                        }
+                    } catch (error) {
+                        // User is not a member of this family, skip
+                        continue;
+                    }
+                }
+
+                // Send event to family room with connected users (even if empty)
+                const userIdsArray = Array.from(connectedUserIds);
+                const eventData = {
+                    type: 'family.connected.caregivers',
+                    familyId: familyId,
+                    connectedUserIds: userIdsArray,
+                    timestamp: new Date().toISOString()
+                };
+
+                console.log(`Sending connected caregivers to family ${familyId}:`, userIdsArray);
+                this.sendEventToFamily(familyId, 'family.connected.caregivers', eventData);
+            }
+
+            console.log(`Sent connected caregivers events to ${families.length} families`);
+
+        } catch (error) {
+            console.error('Error sending active caregivers:', error);
+        }
     }
     
     onModuleInit() {
         console.log('WebSocket Gateway module initialized');
-        
-        // Set up interval for sending debugging events every 5 seconds
-        setInterval(() => {
-            this.sendDebugEvent();
-        }, 5000);
     }
     
     /**
-     * Sends a debugging event to all connected clients
-     * This helps monitor the WebSocket connection and provides
-     * real-time statistics about the server
+     * Sends connected caregivers information to each family room
+     * This allows the frontend to know which caregivers are actually connected
+     * to the family socket and display them as online
      */
-    private sendDebugEvent() {
-        // Get connected clients count safely
-        let connectedClients = 0;
+    private async sendConnectedCaregiversEvent() {
         try {
-            // Try different methods to get the connected clients count
-            if (this.server.engine && typeof this.server.engine.clientsCount === 'number') {
-                // Method 1: Using engine.clientsCount
-                connectedClients = this.server.engine.clientsCount;
-            } else if (this.server.sockets && this.server.sockets.sockets && typeof this.server.sockets.sockets.size === 'number') {
-                // Method 2: Using sockets.sockets.size (original method)
-                connectedClients = this.server.sockets.sockets.size;
-            } else if (this.server.sockets && this.server.sockets.adapter && this.server.sockets.adapter.sids) {
-                // Method 3: Using adapter.sids size
-                connectedClients = this.server.sockets.adapter.sids.size;
-            } else {
-                // Fallback: Use our own tracking
-                connectedClients = this.socketUsers.size;
-                console.warn('Could not determine connected clients count from Socket.IO, using fallback method');
+            // First check if server is available
+            if (!this.server) {
+                console.log('Server not available, skipping connected caregivers event');
+                return;
             }
-        } catch (error) {
-            console.error('Error getting connected clients count:', error);
-            // Fallback to our own tracking
-            connectedClients = this.socketUsers.size;
-        }
 
-        const userCount = this.userSockets.size;
-        
-        const debugData = {
-            type: 'debug.ping',
-            timestamp: new Date().toISOString(),
-            serverTime: new Date().toLocaleTimeString(),
-            stats: {
-                connectedClients,
-                userCount,
-                socketToUserMappings: this.socketUsers.size
+            // Get all rooms from the adapter
+            const rooms = this.server.sockets?.adapter?.rooms;
+
+            // If rooms is undefined or adapter not ready, use fallback method
+            if (!rooms) {
+                console.log('Socket.IO adapter rooms not available, using fallback method');
+                this.sendConnectedCaregiversEventFallback();
+                return;
             }
-        };
-        
-        console.log('Sending debug event to all clients:', debugData);
-        this.server.emit('debug.ping', debugData);
+            
+            console.log(`Processing ${rooms.size} total rooms for connected caregivers`);
+            let familyRoomsProcessed = 0;
+
+            // Process each family room (rooms that start with "family:")
+            for (const [roomName, socketSet] of rooms.entries()) {
+                if (roomName.startsWith('family:')) {
+                    const familyId = roomName.replace('family:', '');
+                    
+                    // Get connected user IDs for this family room
+                    const connectedUserIds = new Set<string>();
+                    
+                    // Convert Set to Array for iteration
+                    const socketIds = Array.from(socketSet || []);
+                    
+                    // Map socket IDs to user IDs
+                    for (const socketId of socketIds) {
+                        const userId = this.socketUsers.get(socketId);
+                        if (userId) {
+                            connectedUserIds.add(userId);
+                        }
+                    }
+                    
+                    // Only send event if there are connected users
+                    if (connectedUserIds.size > 0) {
+                        // Send the connected caregivers event to this family room
+                        this.sendEventToFamily(familyId, 'family.connected.caregivers', {
+                            type: 'family.connected.caregivers',
+                            familyId: familyId,
+                            connectedUserIds: Array.from(connectedUserIds),
+                            timestamp: new Date().toISOString()
+                        });
+
+                        familyRoomsProcessed++;
+                    }
+                }
+            }
+
+            console.log(`Sent connected caregivers events to ${familyRoomsProcessed} family rooms`);
+        } catch (error) {
+            console.error('Error sending connected caregivers event:', error);
+            // Use fallback method in case of error
+            this.sendConnectedCaregiversEventFallback();
+        }
+    }
+    
+    /**
+     * Fallback method for sending connected caregivers information
+     * This is used when the Socket.IO adapter rooms property is not available
+     */
+    private sendConnectedCaregiversEventFallback() {
+        try {
+            console.log(this.server);
+        } catch (error) {
+            console.error('Error in fallback method for connected caregivers event:', error);
+        }
     }
     
     @OnEvent('family.created')
@@ -424,6 +532,19 @@ export class WebSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             });
 
             console.log(`User ${userId} successfully connected with socket ${client.id}`);
+
+            // Send initial connected caregivers update for all families the user belongs to
+            setTimeout(async () => {
+                try {
+                    const userFamilies = await this.familiesService.getUserFamilies(userId);
+                    for (const userFamily of userFamilies) {
+                        await this.sendConnectedCaregiversForFamily(userFamily.familyId);
+                    }
+                } catch (error) {
+                    console.error('Error sending initial connected caregivers:', error);
+                }
+            }, 1000); // Short delay to ensure client is fully ready
+
         } catch (error) {
             console.error('WebSocket connection error:', error);
             client.emit('error', {
@@ -456,11 +577,6 @@ export class WebSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         } else {
             console.log(`Unknown socket disconnected: ${client.id}`);
         }
-    }
-
-    @SubscribeMessage('ping')
-    handlePing(@ConnectedSocket() client: Socket) {
-        client.emit('pong', { timestamp: Date.now() });
     }
 
     @SubscribeMessage('join-family')
@@ -515,6 +631,103 @@ export class WebSocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 code: 7,
                 message: 'Failed to join family room',
                 type: 'JOIN_FAMILY_ERROR',
+                details: error.message
+            });
+        }
+    }
+
+    /**
+     * Sends connected caregivers information for a specific family
+     * This is used for initial connection to immediately show online status
+     */
+    private async sendConnectedCaregiversForFamily(familyId: string) {
+        try {
+            console.log(`Sending connected caregivers for family ${familyId}`);
+
+            const connectedUserIds = new Set<string>();
+
+            // Check all connected sockets to see if any belong to this family's members
+            for (const [socketId, userId] of this.socketUsers.entries()) {
+                try {
+                    const userFamily = await this.familiesService.getUserFamilyRole(userId, familyId);
+                    if (userFamily) {
+                        connectedUserIds.add(userId);
+                        console.log(`User ${userId} is connected and member of family ${familyId}`);
+                    }
+                } catch (error) {
+                    // User is not a member of this family, skip
+                    continue;
+                }
+            }
+
+            // Send event to family room with connected users
+            const userIdsArray = Array.from(connectedUserIds);
+            const eventData = {
+                type: 'family.connected.caregivers',
+                familyId: familyId,
+                connectedUserIds: userIdsArray,
+                timestamp: new Date().toISOString()
+            };
+
+            console.log(`Sending connected caregivers to family ${familyId}:`, userIdsArray);
+            this.sendEventToFamily(familyId, 'family.connected.caregivers', eventData);
+
+        } catch (error) {
+            console.error(`Error sending connected caregivers for family ${familyId}:`, error);
+        }
+    }
+
+    @SubscribeMessage('request-connected-caregivers')
+    async handleRequestConnectedCaregivers(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { familyId?: string }
+    ) {
+        try {
+            const userId = this.socketUsers.get(client.id);
+            if (!userId) {
+                client.emit('error', {
+                    code: 4,
+                    message: 'User not authenticated',
+                    type: 'AUTH_REQUIRED'
+                });
+                return;
+            }
+
+            // If familyId is provided, send for that specific family
+            if (data?.familyId) {
+                // Verify that the user has access to this family
+                try {
+                    const userFamily = await this.familiesService.getUserFamilyRole(userId, data.familyId);
+                    if (!userFamily) {
+                        client.emit('error', {
+                            code: 6,
+                            message: 'You do not have access to this family',
+                            type: 'ACCESS_DENIED'
+                        });
+                        return;
+                    }
+
+                    await this.sendConnectedCaregiversForFamily(data.familyId);
+                } catch (error) {
+                    console.error('Error requesting connected caregivers for specific family:', error);
+                }
+            } else {
+                // Send for all families the user belongs to
+                try {
+                    const userFamilies = await this.familiesService.getUserFamilies(userId);
+                    for (const userFamily of userFamilies) {
+                        await this.sendConnectedCaregiversForFamily(userFamily.familyId);
+                    }
+                } catch (error) {
+                    console.error('Error requesting connected caregivers for all families:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling request for connected caregivers:', error);
+            client.emit('error', {
+                code: 8,
+                message: 'Failed to request connected caregivers',
+                type: 'REQUEST_CAREGIVERS_ERROR',
                 details: error.message
             });
         }

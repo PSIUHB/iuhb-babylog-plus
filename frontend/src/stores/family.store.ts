@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 import familiesService from '../services/families.service';
 import websocketService from '../services/websocket.service';
-import { useAuthStore } from './auth.store';
 
 interface FamilyState {
   families: any[];
   currentFamily: any | null;
   loading: boolean;
   error: string | null;
+  connectedCaregivers: string[]; // Array of connected caregiver user IDs
 }
 
 export const useFamilyStore = defineStore('family', {
@@ -16,12 +16,15 @@ export const useFamilyStore = defineStore('family', {
     currentFamily: null,
     loading: false,
     error: null,
+    connectedCaregivers: [],
   }),
 
   getters: {
     getCurrentFamily: (state) => state.currentFamily,
     getCurrentFamilyId: (state) => state.currentFamily?.id,
     getFamilies: (state) => state.families,
+    getConnectedCaregivers: (state) => state.connectedCaregivers,
+    isUserConnected: (state) => (userId: string) => state.connectedCaregivers.includes(userId),
   },
 
   actions: {
@@ -50,7 +53,6 @@ export const useFamilyStore = defineStore('family', {
 
         return response;
       } catch (error) {
-        console.error('Error fetching families:', error);
 
         // Set proper error message based on error type
         if (error instanceof Error) {
@@ -76,11 +78,9 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       try {
         const familyWithDetails = await familiesService.getFamily(familyId);
-        console.log('DEBUG - Loaded family with details:', familyWithDetails);
         this.currentFamily = familyWithDetails;
         return familyWithDetails;
       } catch (error) {
-        console.error('Error loading family details:', error);
         // Keep the basic family info if detailed loading fails
         const basicFamily = this.families.find(f => f.id === familyId);
         if (basicFamily) {
@@ -101,7 +101,6 @@ export const useFamilyStore = defineStore('family', {
         this.currentFamily = response;
         return response;
       } catch (error) {
-        console.error('Error fetching family:', error);
 
         // Set proper error message
         if (error instanceof Error) {
@@ -138,7 +137,6 @@ export const useFamilyStore = defineStore('family', {
 
         return response;
       } catch (error) {
-        console.error('Error creating family:', error);
         this.error = error instanceof Error ? error.message : 'Failed to create family';
         throw error;
       } finally {
@@ -159,7 +157,6 @@ export const useFamilyStore = defineStore('family', {
 
         return response;
       } catch (error) {
-        console.error('Error joining family:', error);
         this.error = error instanceof Error ? error.message : 'Failed to join family';
         throw error;
       } finally {
@@ -180,7 +177,6 @@ export const useFamilyStore = defineStore('family', {
 
         return response;
       } catch (error) {
-        console.error('Error accepting invitation:', error);
         this.error = error instanceof Error ? error.message : 'Failed to accept invitation';
         throw error;
       } finally {
@@ -196,7 +192,6 @@ export const useFamilyStore = defineStore('family', {
         // Connect to WebSocket and set up event handlers
         await this.setupWebSocketConnection();
       } catch (error) {
-        console.error('Error initializing family store:', error);
         // Error is already handled in fetchFamilies, no need to do anything here
       }
     },
@@ -204,9 +199,10 @@ export const useFamilyStore = defineStore('family', {
     // Set up WebSocket connection and event handlers
     async setupWebSocketConnection() {
       try {
+
         // Connect to WebSocket server
         await websocketService.connect();
-        
+
         // Set up event handlers for family events
         websocketService.on('family.updated', this.handleFamilyUpdated.bind(this));
         websocketService.on('family.member.joined', this.handleFamilyMemberJoined.bind(this));
@@ -227,15 +223,54 @@ export const useFamilyStore = defineStore('family', {
         websocketService.on('event.created', this.handleEventCreated.bind(this));
         websocketService.on('event.milestone.deleted', this.handleEventMilestoneDeleted.bind(this));
         
-        console.log('WebSocket event handlers set up');
-      } catch (error) {
-        console.error('Error setting up WebSocket connection:', error);
-      }
+        // Set up event handler for connected caregivers
+        websocketService.on('family.connected.caregivers', this.handleConnectedCaregivers.bind(this));
+
+
+        // Request initial connected caregivers status when WebSocket is ready
+        this.requestInitialConnectedCaregivers();
+
+      } catch (error) { }
     },
     
+    // Request initial connected caregivers status
+    async requestInitialConnectedCaregivers() {
+      // Wait for WebSocket to be connected
+      const waitForConnection = async () => {
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        while (attempts < maxAttempts && !websocketService.isConnected.value) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
+
+        return websocketService.isConnected.value;
+      };
+
+      try {
+        const isConnected = await waitForConnection();
+
+        if (isConnected) {
+          console.log('Requesting initial connected caregivers status...');
+
+          // Request for current family if available
+          if (this.currentFamily?.id) {
+            websocketService.requestConnectedCaregivers(this.currentFamily.id);
+          } else {
+            // Request for all families
+            websocketService.requestConnectedCaregivers();
+          }
+        } else {
+          console.warn('WebSocket not connected, skipping initial connected caregivers request');
+        }
+      } catch (error) {
+        console.error('Error requesting initial connected caregivers:', error);
+      }
+    },
+
     // Handle family updated event
     async handleFamilyUpdated(data: any) {
-      console.log('Family updated event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -248,7 +283,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle family member joined event
     async handleFamilyMemberJoined(data: any) {
-      console.log('Family member joined event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -258,7 +292,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle family member left event
     async handleFamilyMemberLeft(data: any) {
-      console.log('Family member left event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -268,7 +301,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle family member updated event
     async handleFamilyMemberUpdated(data: any) {
-      console.log('Family member updated event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -278,7 +310,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle family member removed event
     async handleFamilyMemberRemoved(data: any) {
-      console.log('Family member removed event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -288,7 +319,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle child created event
     async handleChildCreated(data: any) {
-      console.log('Child created event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -298,7 +328,6 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle child updated event
     async handleChildUpdated(data: any) {
-      console.log('Child updated event received:', data);
       
       // If this is the current family, refresh it
       if (this.currentFamily && this.currentFamily.id === data.familyId) {
@@ -308,11 +337,10 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle trackable created event
     async handleTrackableCreated(data: any) {
-      console.log('Trackable created event received:', data);
       
       // If this is the current family and we have the child in the current family, refresh the family
       if (this.currentFamily) {
-        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        const childInFamily = this.currentFamily.children?.some((child: any) => child.id === data.childId);
         if (childInFamily) {
           await this.fetchFamily(this.currentFamily.id);
         }
@@ -321,11 +349,10 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle trackable updated event
     async handleTrackableUpdated(data: any) {
-      console.log('Trackable updated event received:', data);
       
       // If this is the current family and we have the child in the current family, refresh the family
       if (this.currentFamily) {
-        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        const childInFamily = this.currentFamily.children?.some((child: any) => child.id === data.childId);
         if (childInFamily) {
           await this.fetchFamily(this.currentFamily.id);
         }
@@ -334,11 +361,10 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle trackable deleted event
     async handleTrackableDeleted(data: any) {
-      console.log('Trackable deleted event received:', data);
       
       // If this is the current family and we have the child in the current family, refresh the family
       if (this.currentFamily) {
-        const childInFamily = this.currentFamily.children?.some(child => child.id === data.childId);
+        const childInFamily = this.currentFamily.children?.some((child: any) => child.id === data.childId);
         if (childInFamily) {
           await this.fetchFamily(this.currentFamily.id);
         }
@@ -347,11 +373,10 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle event created event
     async handleEventCreated(data: any) {
-      console.log('Event created event received:', data);
       
       // If this is the current family and we have the child in the current family, refresh the family
       if (this.currentFamily) {
-        const childInFamily = this.currentFamily.children?.some(child => child.id === data.child.id);
+        const childInFamily = this.currentFamily.children?.some((child: any) => child.id === data.child.id);
         if (childInFamily) {
           await this.fetchFamily(this.currentFamily.id);
         }
@@ -360,14 +385,21 @@ export const useFamilyStore = defineStore('family', {
     
     // Handle event milestone deleted event
     async handleEventMilestoneDeleted(data: any) {
-      console.log('Event milestone deleted event received:', data);
       
       // If this is the current family and we have the child in the current family, refresh the family
       if (this.currentFamily) {
-        const childInFamily = this.currentFamily.children?.some(child => child.id === data.child.id);
+        const childInFamily = this.currentFamily.children?.some((child: any) => child.id === data.child.id);
         if (childInFamily) {
           await this.fetchFamily(this.currentFamily.id);
         }
+      }
+    },
+    
+    // Handle connected caregivers event
+    handleConnectedCaregivers(data: any) {
+      // Only update if this is for the current family
+      if (this.currentFamily && this.currentFamily.id === data.familyId) {
+        this.connectedCaregivers = data.connectedUserIds || [];
       }
     }
   }

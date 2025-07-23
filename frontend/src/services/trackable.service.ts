@@ -23,7 +23,7 @@ export abstract class TrackableService<
    * Create a new trackable
    */
   async create(data: CreateDto): Promise<T> {
-    const result = await api.post<T>(`/${this.endpoint}`, data);
+    const result = await api.post(`/${this.endpoint}`, data);
     // Emit event for trackable created
     eventBus.emit(EVENTS.TRACKABLE_CREATED, { type: this.endpoint, data: result });
     return result;
@@ -33,21 +33,21 @@ export abstract class TrackableService<
    * Get all trackables for a child
    */
   async findAll(childId: string): Promise<T[]> {
-    return api.get<T[]>(`/${this.endpoint}/child/${childId}`);
+    return api.get(`/${this.endpoint}/child/${childId}`);
   }
 
   /**
    * Get a specific trackable by ID
    */
   async findOne(id: string): Promise<T> {
-    return api.get<T>(`/${this.endpoint}/${id}`);
+    return api.get(`/${this.endpoint}/${id}`);
   }
 
   /**
    * Update a trackable
    */
   async update(id: string, data: UpdateDto): Promise<T> {
-    const result = await api.patch<T>(`/${this.endpoint}/${id}`, data);
+    const result = await api.patch(`/${this.endpoint}/${id}`, data);
     // Emit event for trackable updated
     eventBus.emit(EVENTS.TRACKABLE_UPDATED, { type: this.endpoint, data: result });
     return result;

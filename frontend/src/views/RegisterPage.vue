@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import authService from '@/services/auth.service';
 
 const firstName = ref('');
@@ -11,7 +10,6 @@ const confirmPassword = ref('');
 const errorMessage = ref('');
 const successMessage = ref('');
 const isLoading = ref(false);
-const router = useRouter();
 
 const register = async () => {
   try {

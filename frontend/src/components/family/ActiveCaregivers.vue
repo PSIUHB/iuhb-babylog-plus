@@ -1,133 +1,117 @@
 <template>
-	<div class="mt-8">
+	<div class="bg-base-100 rounded-lg p-4 shadow-sm border border-base-200">
 		<h4 class="font-semibold text-sm text-base-content/70 mb-3">Active Caregivers</h4>
-		<div v-if="loading" class="flex justify-center p-4">
+
+		<div v-if="loading" class="flex justify-center py-4">
 			<span class="loading loading-spinner loading-sm"></span>
 		</div>
-		<div v-else-if="error" class="text-sm text-error p-2">
-			{{ error }}
+
+		<div v-else-if="activeCaregivers.length === 0" class="text-center py-4 text-base-content/50">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+			</svg>
+			<p class="text-sm">No caregivers currently online</p>
 		</div>
-		<div v-else-if="caregivers.length === 0" class="text-sm text-base-content/60 p-2">
-			No active caregivers found
+
+		<div v-else class="space-y-3">
+			<div v-for="caregiver in activeCaregivers" :key="caregiver.id" class="flex items-center space-x-3">
+				<div class="relative">
+					<div class="avatar">
+						<div class="w-10 h-10 rounded-full">
+							<img :src="caregiver.avatarUrl ? MediaService.getAvatarUrl(caregiver.avatarUrl) : MediaService.getInitialsAvatar(caregiver.name)" :alt="caregiver.name" />
+						</div>
+					</div>
+					<!-- Online indicator -->
+					<div class="absolute -bottom-0 -right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100"></div>
+				</div>
+
+				<div class="flex-1 min-w-0">
+					<p class="text-sm font-medium text-base-content truncate">
+						{{ caregiver.name }}
+					</p>
+					<p class="text-xs text-base-content/60 capitalize">
+						{{ caregiver.role }}
+					</p>
+				</div>
+
+				<div class="text-xs text-success font-medium">
+					Online
+				</div>
+			</div>
 		</div>
-		<div v-else class="space-y-2">
-			<div
-				v-for="caregiver in caregivers"
-				:key="caregiver.id"
-				class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer"
-			>
-				<div
-					class="avatar"
-					:class="isOnline(caregiver) ? 'avatar-online' : 'avatar-offline'"
-				>
-					<div class="w-8 h-8 rounded-full">
-						<img 
-							:src="caregiver.avatar || 'https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp'" 
-							:alt="getCaregiversName(caregiver)" 
-						/>
+
+		<!-- Show offline members if there are any -->
+		<div v-if="offlineCaregivers.length > 0" class="mt-4 pt-3 border-t border-base-200">
+			<p class="text-xs text-base-content/50 mb-2">Offline ({{ offlineCaregivers.length }})</p>
+			<div class="space-y-2">
+				<div v-for="caregiver in offlineCaregivers.slice(0, 3)" :key="caregiver.id" class="flex items-center space-x-3 opacity-60">
+					<div class="avatar">
+						<div class="w-8 h-8 rounded-full">
+							<img :src="caregiver.avatarUrl ? MediaService.getAvatarUrl(caregiver.avatarUrl) : MediaService.getInitialsAvatar(caregiver.name)" :alt="caregiver.name" />
+						</div>
+					</div>
+					<div class="flex-1 min-w-0">
+						<p class="text-xs text-base-content/70 truncate">
+							{{ caregiver.name }}
+						</p>
+					</div>
+					<div class="text-xs text-base-content/40">
+						Offline
 					</div>
 				</div>
-				<div>
-					<div class="text-sm font-semibold">
-						{{ getCaregiversName(caregiver) }}{{ isCurrentUser(caregiver) ? ' (You)' : '' }}
-					</div>
-					<div class="text-xs text-base-content/60">{{ getLastActiveText(caregiver) }}</div>
+				<div v-if="offlineCaregivers.length > 3" class="text-xs text-base-content/40 text-center">
+					+{{ offlineCaregivers.length - 3 }} more offline
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useAuthStore } from '@/stores/auth.store'
+<script setup>
+import { computed, onMounted } from 'vue'
 import { useFamilyStore } from '@/stores/family.store'
-import caregiversService, { Caregiver } from '@/services/caregivers.service'
+import MediaService from '@/services/media.service'
 
-const authStore = useAuthStore()
 const familyStore = useFamilyStore()
-const caregivers = ref<Caregiver[]>([])
-const loading = ref<boolean>(false)
-const error = ref<string | null>(null)
 
-const currentUser = computed(() => authStore.getUser)
-const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
+// Computed properties
+const loading = computed(() => familyStore.loading)
+const currentFamily = computed(() => familyStore.currentFamily)
+const connectedCaregivers = computed(() => familyStore.connectedCaregivers || [])
 
-// Fetch caregivers when component is mounted
-onMounted(async () => {
-  await fetchCaregivers()
+// Get all family members and their online status
+const activeCaregivers = computed(() => {
+	if (!currentFamily.value?.userFamilies) return []
+
+	return currentFamily.value.userFamilies
+		.filter(uf => !uf.leftAt) // Only active members
+		.filter(uf => connectedCaregivers.value.includes(uf.userId)) // Only connected users
+		.map(uf => ({
+			id: uf.userId,
+			name: `${uf.user.firstName} ${uf.user.lastName}`,
+			role: uf.role,
+			avatarUrl: uf.user.avatarUrl,
+			isOnline: true
+		}))
 })
 
-// Watch for changes in the current family ID
-watch(currentFamilyId, async (newFamilyId) => {
-  if (newFamilyId) {
-    await fetchCaregivers()
-  }
+const offlineCaregivers = computed(() => {
+	if (!currentFamily.value?.userFamilies) return []
+
+	return currentFamily.value.userFamilies
+		.filter(uf => !uf.leftAt) // Only active members
+		.filter(uf => !connectedCaregivers.value.includes(uf.userId)) // Only disconnected users
+		.map(uf => ({
+			id: uf.userId,
+			name: `${uf.user.firstName} ${uf.user.lastName}`,
+			role: uf.role,
+			avatarUrl: uf.user.avatarUrl,
+			isOnline: false
+		}))
 })
 
-// Fetch caregivers from the service
-const fetchCaregivers = async (): Promise<void> => {
-  if (!currentFamilyId.value) return
-
-  loading.value = true
-  error.value = null
-
-  try {
-    const data = await caregiversService.getCaregiversByFamily(currentFamilyId.value)
-    
-    // Check if the response is an error object
-    if (data && data.error === true) {
-      console.error('Error fetching caregivers:', data.message)
-      error.value = 'Failed to load caregivers'
-      caregivers.value = []
-    } else {
-      caregivers.value = data || []
-    }
-  } catch (err) {
-    console.error('Error fetching caregivers:', err)
-    error.value = 'Failed to load caregivers'
-    caregivers.value = []
-  } finally {
-    loading.value = false
-  }
-}
-
-// Check if caregiver is the current user
-const isCurrentUser = (caregiver: Caregiver): boolean => {
-	return caregiver.id === currentUser.value?.id
-}
-
-// Check if caregiver is online (simplified logic)
-const isOnline = (caregiver: Caregiver): boolean => {
-	return caregiver.status === 'active'
-}
-
-// Get caregiver's name
-const getCaregiversName = (caregiver: Caregiver): string => {
-	return `${caregiver.firstName} ${caregiver.lastName}`.trim()
-}
-
-// Get formatted last active text
-const getLastActiveText = (caregiver: Caregiver): string => {
-	if (isOnline(caregiver)) {
-		return 'Active now'
-	}
-
-	if (caregiver.lastActive) {
-		// Simple formatting - in a real app, you'd use a date library
-		const lastActive = new Date(caregiver.lastActive)
-		const now = new Date()
-		const diffMs = now.getTime() - lastActive.getTime()
-		const diffMins = Math.floor(diffMs / 60000)
-
-		if (diffMins < 60) {
-			return `${diffMins} min ago`
-		} else {
-			const diffHours = Math.floor(diffMins / 60)
-			return `${diffHours} hours ago`
-		}
-	}
-
-	return 'Unknown'
-}
+onMounted(() => {
+	// Ensure WebSocket connection is established
+	familyStore.setupWebSocketConnection()
+})
 </script>

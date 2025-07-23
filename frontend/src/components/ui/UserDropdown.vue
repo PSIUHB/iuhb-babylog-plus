@@ -1,7 +1,13 @@
 <template>
 	<div class="dropdown dropdown-end">
-		<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar p-2 flex items-center justify-center">
-			<img :src="user?.avatarUrl || 'https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp'" :alt="user?.firstName || 'User'" class="rounded-full" />
+  <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar p-2 flex items-center justify-center">
+			<img 
+				:src="user?.avatarUrl 
+					? MediaService.getAvatarUrl(user.avatarUrl) 
+					: MediaService.getInitialsAvatar(user?.firstName + ' ' + user?.lastName || 'User')" 
+				:alt="user?.firstName || 'User'" 
+				class="rounded-full" 
+			/>
 		</div>
 		<ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg">
 			<li v-if="user" class="p-2 text-center font-medium">
@@ -21,6 +27,7 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { computed } from 'vue'
+import MediaService from '@/services/media.service'
 
 const router = useRouter()
 const authStore = useAuthStore()

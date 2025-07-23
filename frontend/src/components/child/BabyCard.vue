@@ -7,10 +7,13 @@
 		<div class="flex items-center gap-4 mb-4">
 			<div class="avatar">
 				<div
-					class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none"
+					class="w-16 h-16 rounded-full flex items-center justify-center text-center leading-none overflow-hidden"
 					:class="avatarClasses"
 				>
-					<span class="text-2xl font-bold flex items-center justify-center w-full h-full">{{ baby.initial }}</span>
+					<!-- Show image if avatarUrl exists -->
+					<img v-if="baby.avatarUrl" :src="MediaService.getAvatarUrl(baby.avatarUrl)" :alt="baby.name" class="w-full h-full object-cover" />
+					<!-- Show initial if no avatarUrl -->
+					<span v-else class="text-2xl font-bold flex items-center justify-center w-full h-full">{{ baby.initial }}</span>
 				</div>
 			</div>
 			<div>
@@ -88,6 +91,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { TrackableType } from '@/enums/trackable-type.enum'
 import { useChildAutoUpdate } from '@/composables/useAutoUpdate'
+import MediaService from '@/services/media.service'
 
 // Import trackable modal components
 import FeedModal from '@/components/trackables/FeedModal.vue'

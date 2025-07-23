@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import authService from '../services/auth.service';
-import type { RegisterRequest, UserProfile } from '../services/auth.service';
+import type { RegisterRequest, UserProfile } from '@/interfaces';
 import { useFamilyStore } from './family.store';
 
 // Define the LoginRequest interface locally
