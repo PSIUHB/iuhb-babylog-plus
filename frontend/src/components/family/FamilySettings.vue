@@ -9,7 +9,6 @@
 			helpText="This will be displayed in invitations and reports"
 			maxlength="50"
 		/>
-
 		<!-- Family Description -->
 		<TextInput
 			v-model="familyData.description"
@@ -20,7 +19,6 @@
 			maxlength="200"
 			showCharCount
 		/>
-
 		<!-- Action Buttons -->
 		<div class="flex mt-4">
 			<div class="ms-auto">
@@ -44,26 +42,21 @@
 		</div>
 	</form>
 </template>
-
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import TextInput from '@/components/ui/TextInput.vue'
 import SelectInput from '@/components/ui/SelectInput.vue'
-
 const props = defineProps({
 	family: {
 		type: Object,
 		required: true
 	}
 })
-
 const emit = defineEmits(['family-updated'])
-
 // Reactive data
 const isSaving = ref(false)
 const errors = ref({})
 const children = ref([])
-
 const familyData = reactive({
 	name: '',
 	description: '',
@@ -76,15 +69,12 @@ const familyData = reactive({
 		phone: ''
 	}
 })
-
 // Update form data from family object
 const updateFormFromFamily = (family) => {
 	if (!family) return
-
 	familyData.name = family.name || ''
 	familyData.description = family.description || ''
 	familyData.timezone = family.timezone || 'Europe/Berlin'
-
 	// Set privacy settings with defaults if not present
 	familyData.allowPhotosInReports = family.allowPhotosInReports !== undefined 
 		? family.allowPhotosInReports 
@@ -95,26 +85,22 @@ const updateFormFromFamily = (family) => {
 	familyData.enableLocationTracking = family.enableLocationTracking !== undefined 
 		? family.enableLocationTracking 
 		: true
-
 	// Set emergency contact with defaults if not present
 	familyData.emergencyContact = {
 		name: family.emergencyContact?.name || '',
 		phone: family.emergencyContact?.phone || ''
 	}
-
 	// Set children if available
 	if (family.children && Array.isArray(family.children)) {
 		children.value = family.children
 	}
 }
-
 // Watch for changes in the family prop and update the form data
 watch(() => props.family, (newFamily) => {
 	if (newFamily) {
 		updateFormFromFamily(newFamily)
 	}
 }, { immediate: true })
-
 const timezones = ref([
 	{ value: 'Europe/Berlin', label: 'Central European Time (CET)' },
 	{ value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
@@ -123,25 +109,19 @@ const timezones = ref([
 	{ value: 'Asia/Tokyo', label: 'Japan Standard Time (JST)' },
 	{ value: 'Australia/Sydney', label: 'Australian Eastern Time (AET)' }
 ])
-
 // Validation
 const validateForm = () => {
 	errors.value = {}
-
 	if (!familyData.name || familyData.name.trim().length < 2) {
 		errors.value.familyName = 'Family name must be at least 2 characters'
 		return false
 	}
-
 	return true
 }
-
 // Methods
 const saveFamilySettings = async () => {
 	if (!validateForm()) return
-
 	isSaving.value = true
-
 	try {
 		// Prepare data for API
 		const updateData = {
@@ -156,10 +136,8 @@ const saveFamilySettings = async () => {
 				phone: familyData.emergencyContact.phone
 			}
 		}
-
 		// Emit event to parent component to handle the API call
 		emit('family-updated', updateData)
-
 		// Show success message
 		// This would be better with a toast notification system
 		alert('Family settings saved successfully!')
@@ -170,7 +148,6 @@ const saveFamilySettings = async () => {
 		isSaving.value = false
 	}
 }
-
 const resetForm = () => {
 	// Reset form to current family data
 	updateFormFromFamily(props.family)

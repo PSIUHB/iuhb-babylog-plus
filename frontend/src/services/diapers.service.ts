@@ -6,7 +6,6 @@ import type {
   DiaperUpdateDto,
   IDiapersService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing diapers
  */
@@ -14,7 +13,6 @@ class DiapersService extends TrackableService<Diaper, DiaperCreateDto, DiaperUpd
   constructor() {
     super('diapers');
   }
-
   /**
    * Get statistics for diapers
    */
@@ -22,5 +20,4 @@ class DiapersService extends TrackableService<Diaper, DiaperCreateDto, DiaperUpd
     return api.get(`/diapers/statistics/child/${childId}`);
   }
 }
-
 export default new DiapersService();

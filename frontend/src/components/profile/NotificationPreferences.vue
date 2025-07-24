@@ -2,7 +2,6 @@
 	<div class="card bg-base-100 shadow-lg">
 		<div class="card-body">
 			<h3 class="card-title mb-6">Notification Preferences</h3>
-
 			<form @submit.prevent="saveNotificationPreferences" class="space-y-6">
 				<!-- Email Notifications -->
 				<div class="space-y-4">
@@ -12,7 +11,6 @@
 						</svg>
 						Email Notifications
 					</h4>
-
 					<div class="space-y-3">
 						<label class="label cursor-pointer">
 							<div>
@@ -25,7 +23,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Weekly Reports</span>
@@ -37,7 +34,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Milestone Achievements</span>
@@ -49,7 +45,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Family Updates</span>
@@ -61,7 +56,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Account & Security</span>
@@ -75,7 +69,6 @@
 						</label>
 					</div>
 				</div>
-
 				<!-- Push Notifications -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold flex items-center gap-2">
@@ -84,7 +77,6 @@
 						</svg>
 						Push Notifications
 					</h4>
-
 					<div class="space-y-3">
 						<label class="label cursor-pointer">
 							<div>
@@ -97,7 +89,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Sleep Tracking</span>
@@ -109,7 +100,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Caregiver Activities</span>
@@ -121,7 +111,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Emergency Alerts</span>
@@ -135,7 +124,6 @@
 						</label>
 					</div>
 				</div>
-
 				<!-- SMS Notifications -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold flex items-center gap-2">
@@ -144,14 +132,12 @@
 						</svg>
 						SMS Notifications
 					</h4>
-
 					<div class="alert alert-info">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
 						<span>SMS notifications may incur charges from your mobile carrier</span>
 					</div>
-
 					<div class="space-y-3">
 						<label class="label cursor-pointer">
 							<div>
@@ -164,7 +150,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Daily Reminders</span>
@@ -178,7 +163,6 @@
 						</label>
 					</div>
 				</div>
-
 				<!-- Notification Timing -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold flex items-center gap-2">
@@ -187,7 +171,6 @@
 						</svg>
 						Quiet Hours
 					</h4>
-
 					<div class="space-y-4">
 						<label class="label cursor-pointer">
 							<span class="label-text font-semibold">Enable Quiet Hours</span>
@@ -197,21 +180,18 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<div v-if="preferences.quietHours.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
 							<TextInput
 								v-model="preferences.quietHours.startTime"
 								type="time"
 								label="Start Time"
 							/>
-
 							<TextInput
 								v-model="preferences.quietHours.endTime"
 								type="time"
 								label="End Time"
 							/>
 						</div>
-
 						<div v-if="preferences.quietHours.enabled" class="pl-6">
 							<label class="label cursor-pointer">
 								<span class="label-text">Allow emergency notifications during quiet hours</span>
@@ -224,7 +204,6 @@
 						</div>
 					</div>
 				</div>
-
 				<!-- Smart Notifications -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold flex items-center gap-2">
@@ -233,7 +212,6 @@
 						</svg>
 						Smart Notifications
 					</h4>
-
 					<div class="space-y-3">
 						<label class="label cursor-pointer">
 							<div>
@@ -246,7 +224,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Pattern Insights</span>
@@ -258,7 +235,6 @@
 								class="checkbox checkbox-primary"
 							/>
 						</label>
-
 						<label class="label cursor-pointer">
 							<div>
 								<span class="label-text font-semibold">Predictive Alerts</span>
@@ -272,28 +248,23 @@
 						</label>
 					</div>
 				</div>
-
 				<!-- Notification Frequency -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold">Notification Frequency</h4>
-
 					<SelectInput
 						v-model="preferences.frequency.dailySummaryTime"
 						label="Daily Summary Time"
 						:options="dailySummaryTimeOptions"
 					/>
-
 					<SelectInput
 						v-model="preferences.frequency.weeklyReportDay"
 						label="Weekly Report Day"
 						:options="weeklyReportDayOptions"
 					/>
 				</div>
-
 				<!-- Test Notifications -->
 				<div class="space-y-4">
 					<h4 class="text-lg font-semibold">Test Notifications</h4>
-
 					<div class="flex flex-wrap gap-2">
 						<button
 							type="button"
@@ -321,7 +292,6 @@
 						</button>
 					</div>
 				</div>
-
 				<!-- Action Buttons -->
 				<div class="card-actions justify-end pt-6 border-t border-base-300">
 					<button
@@ -345,18 +315,14 @@
 		</div>
 	</div>
 </template>
-
 <script setup>
 import { ref, reactive } from 'vue'
 import TextInput from '@/components/ui/TextInput.vue'
 import SelectInput from '@/components/ui/SelectInput.vue'
-
 const emit = defineEmits(['preferences-updated'])
-
 // Reactive data
 const isSaving = ref(false)
 const isTesting = ref(false)
-
 // Options for select inputs
 const dailySummaryTimeOptions = [
   { value: 'morning', label: 'Morning (8:00 AM)' },
@@ -364,14 +330,12 @@ const dailySummaryTimeOptions = [
   { value: 'evening', label: 'Evening (7:00 PM)' },
   { value: 'night', label: 'Night (10:00 PM)' }
 ]
-
 const weeklyReportDayOptions = [
   { value: 'sunday', label: 'Sunday' },
   { value: 'monday', label: 'Monday' },
   { value: 'friday', label: 'Friday' },
   { value: 'saturday', label: 'Saturday' }
 ]
-
 // Notification preferences
 const preferences = reactive({
 	email: {
@@ -407,23 +371,18 @@ const preferences = reactive({
 		weeklyReportDay: 'sunday'
 	}
 })
-
 // Methods
 const saveNotificationPreferences = async () => {
 	isSaving.value = true
-
 	try {
 		await new Promise(resolve => setTimeout(resolve, 1000))
-
 		emit('preferences-updated', { ...preferences })
-		console.log('Notification preferences saved successfully!')
 	} catch (error) {
 		console.error('Error saving preferences:', error)
 	} finally {
 		isSaving.value = false
 	}
 }
-
 const resetPreferences = () => {
 	// Reset to default values
 	preferences.email.dailySummary = true
@@ -431,36 +390,26 @@ const resetPreferences = () => {
 	preferences.email.milestones = true
 	preferences.email.familyUpdates = true
 	preferences.email.security = true
-
 	preferences.push.feedingReminders = true
 	preferences.push.sleepTracking = true
 	preferences.push.caregiverActivities = false
 	preferences.push.emergencyAlerts = true
-
 	preferences.sms.emergencyOnly = true
 	preferences.sms.dailyReminders = false
-
 	preferences.quietHours.enabled = true
 	preferences.quietHours.startTime = '22:00'
 	preferences.quietHours.endTime = '07:00'
 	preferences.quietHours.allowEmergency = true
-
 	preferences.smart.adaptiveReminders = true
 	preferences.smart.patternInsights = true
 	preferences.smart.predictiveAlerts = false
-
 	preferences.frequency.dailySummaryTime = 'evening'
 	preferences.frequency.weeklyReportDay = 'sunday'
 }
-
 const sendTestNotification = async (type) => {
 	isTesting.value = true
-
 	try {
 		await new Promise(resolve => setTimeout(resolve, 1000))
-
-		console.log(`Test ${type} notification sent!`)
-
 		// Show success message
 		alert(`Test ${type} notification sent successfully!`)
 	} catch (error) {

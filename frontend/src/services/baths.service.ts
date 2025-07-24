@@ -6,7 +6,6 @@ import type {
   BathUpdateDto,
   IBathsService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing baths
  */
@@ -14,7 +13,6 @@ class BathsService extends TrackableService<Bath, BathCreateDto, BathUpdateDto> 
   constructor() {
     super('baths');
   }
-
   /**
    * Get statistics for baths
    */
@@ -22,5 +20,4 @@ class BathsService extends TrackableService<Bath, BathCreateDto, BathUpdateDto> 
     return api.get(`/baths/statistics/child/${childId}`);
   }
 }
-
 export default new BathsService();

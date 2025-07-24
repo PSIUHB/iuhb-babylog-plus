@@ -1,6 +1,5 @@
 import api from '@/services/api';
 import {MilestoneCategory} from '@/interfaces/milestone.interface';
-
 /**
  * Service for managing milestone events
  */
@@ -17,7 +16,6 @@ export class MilestonesService {
       throw error;
     }
   }
-
   /**
    * Get all milestones grouped by category
    */
@@ -50,7 +48,6 @@ export class MilestonesService {
       throw error;
     }
   }
-
   /**
    * Get all milestone events for a child
    */
@@ -62,7 +59,6 @@ export class MilestonesService {
       throw error;
     }
   }
-
   /**
    * Get all milestones with their achievement status for a child
    */
@@ -76,7 +72,6 @@ export class MilestonesService {
       throw error;
     }
   }
-
   /**
    * Delete a milestone achievement event
    */
@@ -90,7 +85,6 @@ export class MilestonesService {
     }
   }
 }
-
 /**
  * Instance-based service for managing milestone events
  * This provides compatibility with the default export pattern used by other services
@@ -102,14 +96,12 @@ class MilestoneServiceInstance {
   async getAllMilestones() {
     return MilestonesService.getAllMilestones();
   }
-
   /**
    * Get all milestones grouped by category
    */
   async getAllMilestonesByCategory() {
     return MilestonesService.getAllMilestonesByCategory();
   }
-
   /**
    * Create a milestone event for a child
    */
@@ -124,14 +116,12 @@ class MilestoneServiceInstance {
   }) {
     return MilestonesService.createMilestoneEvent(milestoneData);
   }
-
   /**
    * Get all milestone events for a child
    */
   async getMilestoneEvents(childId: string) {
     return MilestonesService.getMilestoneEvents(childId);
   }
-
   /**
    * Get all milestones with their achievement status for a child
    * This is also aliased as getMilestones for compatibility with RecentActivity.vue
@@ -139,14 +129,12 @@ class MilestoneServiceInstance {
   async getChildMilestones(childId: string) {
     return MilestonesService.getChildMilestones(childId);
   }
-
   /**
    * Alias for getChildMilestones to maintain compatibility with RecentActivity.vue
    */
   async getMilestones(childId: string) {
     return this.getChildMilestones(childId);
   }
-
   /**
    * Delete a milestone achievement event
    */
@@ -154,5 +142,4 @@ class MilestoneServiceInstance {
     return MilestonesService.deleteMilestoneEvent(eventId);
   }
 }
-
 export default new MilestoneServiceInstance();

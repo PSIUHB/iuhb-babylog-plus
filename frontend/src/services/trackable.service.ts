@@ -7,7 +7,6 @@ import type {
 } from '@/interfaces/trackable.interface';
 import eventBus from './event-bus.service';
 import { EVENTS } from '@/constants/events';
-
 /**
  * Base service for all trackable entities
  */
@@ -16,9 +15,7 @@ export abstract class TrackableService<
   CreateDto extends TrackableCreateDto,
   UpdateDto extends TrackableUpdateDto
 > implements ITrackableService<T, CreateDto, UpdateDto> {
-  
   constructor(protected endpoint: string) {}
-
   /**
    * Create a new trackable
    */
@@ -28,21 +25,18 @@ export abstract class TrackableService<
     eventBus.emit(EVENTS.TRACKABLE_CREATED, { type: this.endpoint, data: result });
     return result;
   }
-
   /**
    * Get all trackables for a child
    */
   async findAll(childId: string): Promise<T[]> {
     return api.get(`/${this.endpoint}/child/${childId}`);
   }
-
   /**
    * Get a specific trackable by ID
    */
   async findOne(id: string): Promise<T> {
     return api.get(`/${this.endpoint}/${id}`);
   }
-
   /**
    * Update a trackable
    */
@@ -52,7 +46,6 @@ export abstract class TrackableService<
     eventBus.emit(EVENTS.TRACKABLE_UPDATED, { type: this.endpoint, data: result });
     return result;
   }
-
   /**
    * Delete a trackable
    */

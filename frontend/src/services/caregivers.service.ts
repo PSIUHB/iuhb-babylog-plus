@@ -1,6 +1,5 @@
 import api from './api';
 import type { Caregiver, ICaregiversService, CaregiverInviteDto, CaregiverUpdateDto } from '@/interfaces';
-
 class CaregiversService implements ICaregiversService {
   /**
    * Get all caregivers in a family
@@ -24,14 +23,12 @@ class CaregiversService implements ICaregiversService {
       return [];
     });
   }
-
   /**
    * Invite a caregiver to a family
    */
   async inviteCaregiver(familyId: string, caregiverData: CaregiverInviteDto) {
     return api.post(`/families/${familyId}/invite`, caregiverData);
   }
-
   /**
    * Update a caregiver's role in a family
    * Note: This endpoint needs to be implemented in the backend
@@ -39,7 +36,6 @@ class CaregiversService implements ICaregiversService {
   async updateCaregiver(familyId: string, userId: string, caregiverData: CaregiverUpdateDto) {
     return api.patch(`/families/${familyId}/members/${userId}`, caregiverData);
   }
-
   /**
    * Remove a caregiver from a family
    * Note: This uses the leaveFamily endpoint, but needs to be updated to allow admins to remove members
@@ -47,7 +43,6 @@ class CaregiversService implements ICaregiversService {
   async removeCaregiver(familyId: string, userId: string) {
     return api.delete(`/families/${familyId}/members/${userId}`);
   }
-
   /**
    * Resend invitation to a caregiver
    * Note: This endpoint needs to be implemented in the backend
@@ -55,7 +50,5 @@ class CaregiversService implements ICaregiversService {
   async resendInvitation(familyId: string, email: string) {
     return api.post(`/families/${familyId}/invite/resend`, { email });
   }
-
 }
-
 export default new CaregiversService();

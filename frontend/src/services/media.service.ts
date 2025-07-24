@@ -1,5 +1,4 @@
 import api from './api';
-
 /**
  * Service for handling media uploads and management
  */
@@ -14,11 +13,9 @@ class MediaService {
     // Create form data
     const formData = new FormData();
     formData.append('file', file);
-
     // Use fetch directly for multipart/form-data
     const token = localStorage.getItem('token');
     const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
-    
     try {
       const response = await fetch(`${apiUrl}/media/upload/${type}`, {
         method: 'POST',
@@ -27,19 +24,16 @@ class MediaService {
         },
         body: formData,
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Upload failed');
       }
-
       return response.json();
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;
     }
   }
-
   /**
    * Delete a file from the server
    * @param filename The filename to delete
@@ -49,7 +43,6 @@ class MediaService {
   async deleteFile(filename: string, type: 'avatars' | 'documents' | 'events' = 'avatars') {
     return api.delete(`/media/${type}/${filename}`);
   }
-
   /**
    * Get the full URL for an avatar
    * @param avatarUrl The avatar URL or path
@@ -59,21 +52,17 @@ class MediaService {
     if (!avatarUrl) {
       return ''; // Return empty string for null/undefined
     }
-
     // If it's already a full URL or a data URL, return as is
     if (avatarUrl.startsWith('http') || avatarUrl.startsWith('data:')) {
       return avatarUrl;
     }
-
     // If it's a UI Avatars URL, return as is
     if (avatarUrl.includes('ui-avatars.com')) {
       return avatarUrl;
     }
-
     // Get the API URL and extract the base URL (protocol, hostname, port)
     const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
     let baseUrl = '';
-    
     // If apiUrl is a full URL (starts with http), extract the origin
     if (apiUrl.startsWith('http')) {
       try {
@@ -86,7 +75,6 @@ class MediaService {
       // If apiUrl is relative, use the current origin
       baseUrl = window.location.origin;
     }
-    
     // If it's a path to a static file in the uploads directory, prepend the base URL
     if (avatarUrl.startsWith('/uploads/')) {
       // For uploads, we need to use the backend server's origin
@@ -100,18 +88,15 @@ class MediaService {
       }
       return `${baseUrl}${avatarUrl}`;
     }
-    
     // If the path already starts with the API URL, return it as is
     if (avatarUrl.startsWith(apiUrl)) {
       return avatarUrl;
     }
-    
     // Otherwise, prepend the API URL
     // Remove leading slash if present to avoid double slashes
     const cleanPath = avatarUrl.startsWith('/') ? avatarUrl.substring(1) : avatarUrl;
     return `${apiUrl}/${cleanPath}`;
   }
-
   /**
    * Generate an avatar with initials as an SVG data URL
    * @param name The name to use for initials
@@ -122,11 +107,9 @@ class MediaService {
   getInitialsAvatar(name: string, background: string = '6366f1', color: string = 'ffffff'): string {
     // Extract initials from name
     const initials = this.getInitialsFromName(name);
-    
     // Convert hex colors to include # prefix
     const bgColor = `#${background}`;
     const textColor = `#${color}`;
-    
     // Create SVG for the avatar
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -145,11 +128,9 @@ class MediaService {
         </text>
       </svg>
     `;
-    
     // Convert SVG to a data URL
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   }
-  
   /**
    * Extract initials from a name
    * @param name Full name
@@ -159,10 +140,8 @@ class MediaService {
     if (!name || name.trim() === '') {
       return '?';
     }
-    
     // Split the name by spaces and get the first letter of each part
     const parts = name.trim().split(/\s+/);
-    
     if (parts.length === 1) {
       // If only one name part, return the first letter
       return parts[0].charAt(0).toUpperCase();
@@ -174,5 +153,4 @@ class MediaService {
     }
   }
 }
-
 export default new MediaService();

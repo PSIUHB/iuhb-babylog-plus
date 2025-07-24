@@ -1,7 +1,6 @@
 /**
  * Authentication related interfaces
  */
-
 export interface RegisterRequest {
   email: string;
   password: string;
@@ -11,12 +10,10 @@ export interface RegisterRequest {
   locale?: string;
   timezone?: string;
 }
-
 export interface LoginRequest {
   email: string;
   password: string;
 }
-
 export interface AuthResponse {
   accessToken: string;
   user: {
@@ -29,7 +26,6 @@ export interface AuthResponse {
     familyId?: string;
   };
 }
-
 export interface UserProfile {
   id: string;
   email: string;
@@ -39,7 +35,6 @@ export interface UserProfile {
   isActive?: boolean;
   familyId?: string;
 }
-
 export interface UpdateUserDto {
   firstName?: string;
   lastName?: string;

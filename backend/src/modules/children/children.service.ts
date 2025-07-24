@@ -11,7 +11,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventsService } from '@/modules/events/events.service';
 import { EventType } from '@/interfaces/event.interface';
 import { SleepsService } from '@/modules/trackables/services/sleeps.service';
-import { SleepStatus } from '@/modules/trackables/entities/sleep.entity';
 
 @Injectable()
 export class ChildrenService {
@@ -431,8 +430,8 @@ export class ChildrenService {
         // Get the most recent sleep record
         const latestSleepRecord = sortedSleepRecords[0];
 
-        // If the most recent sleep record has status START, the child is sleeping
-        if (latestSleepRecord.status === SleepStatus.START) {
+        // If the most recent sleep record has no endTime, the child is sleeping
+        if (!latestSleepRecord.endTime) {
             return { status: 'sleeping' };
         }
 

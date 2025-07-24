@@ -21,10 +21,11 @@
 						:class="baby.bgClass"
 					>
 						<div class="flex items-center gap-3">
-							<div
-								class="w-6 h-6 rounded-full"
-								:class="baby.colorClass"
-							></div>
+							<Avatar
+								:src="baby.avatarUrl"
+								:name="baby.name"
+								size="xs"
+							/>
 							<span class="text-sm font-semibold">{{ baby.name }}</span>
 						</div>
 						<div class="text-sm">{{ baby.feedings }} feedings</div>
@@ -33,26 +34,22 @@
 			</div>
 		</div>
 	</div>
-	
 	<!-- Help Modal -->
 	<HelpModal ref="helpModal" title="Understanding Feeding Schedule">
 		<div>
 			<h4 class="font-semibold mb-2">About the Chart</h4>
 			<p>This chart shows today's feeding schedule for each child. It displays the total number of feedings recorded for each child since midnight.</p>
 		</div>
-		
 		<div>
 			<h4 class="font-semibold mb-2">Feeding Count</h4>
 			<p>The number displayed represents how many times each child has been fed today. This helps you track feeding frequency and ensure regular nutrition.</p>
 		</div>
-		
 		<div>
 			<h4 class="font-semibold mb-2">Color Coding</h4>
 			<p>Each child is assigned a unique color to help you quickly identify their feeding information at a glance.</p>
 		</div>
 	</HelpModal>
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import childrenService from '@/services/children.service'
@@ -62,103 +59,81 @@ import { TrackableType } from '@/enums/trackable-type.enum'
 import HelpModal from '@/components/global/HelpModal.vue'
 import HelpButton from '@/components/global/HelpButton.vue'
 import { useAutoUpdate } from '@/composables/useAutoUpdate'
-
+import Avatar from "@/components/ui/Avatar.vue";
 const feedingData = ref([])
 const loading = ref(false)
 const error = ref(null)
 const helpModal = ref(null)
 const familyStore = useFamilyStore()
-
 // Modal functions
 const openHelpModal = () => {
   helpModal.value?.openModal()
 }
-
 const closeHelpModal = () => {
   helpModal.value?.closeModal()
 }
-
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
-
 // Setup automatic updates via WebSocket
 const { isUpdating } = useAutoUpdate({
   familyId: computed(() => currentFamilyId.value),
   refreshFn: async () => {
-    console.log('Feeding schedule data changed via WebSocket, refreshing...')
     await fetchFeedingData()
   }
 })
-
 // Format time until next feeding
 const formatTimeUntilNextFeeding = (lastFeedingTime) => {
   const now = new Date()
   const lastFeeding = new Date(lastFeedingTime)
   const timeSinceLastFeeding = now - lastFeeding
-
   // Assuming babies should be fed every 3 hours
   const feedingInterval = 3 * 60 * 60 * 1000 // 3 hours in milliseconds
   const timeUntilNextFeeding = feedingInterval - timeSinceLastFeeding
-
   if (timeUntilNextFeeding <= 0) {
     return 'Now'
   }
-
   const minutesUntil = Math.floor(timeUntilNextFeeding / (60 * 1000))
   const hoursUntil = Math.floor(minutesUntil / 60)
   const remainingMinutes = minutesUntil % 60
-
   if (hoursUntil > 0) {
     return `${hoursUntil} hour${hoursUntil > 1 ? 's' : ''} ${remainingMinutes > 0 ? remainingMinutes + ' minutes' : ''}`
   } else {
     return `${minutesUntil} minutes`
   }
 }
-
 // Get child color theme
 const getChildColorTheme = (childId) => {
   return parseInt(childId) % 2 === 0 ? 'secondary' : 'primary'
 }
-
 // Fetch feeding data
 const fetchFeedingData = async () => {
   if (!currentFamilyId.value) {
     await familyStore.fetchFamilies()
   }
-
   if (currentFamilyId.value) {
     loading.value = true
     error.value = null
-
     try {
       // Fetch children for the current family
       const childrenResponse = await childrenService.getChildrenByFamily(currentFamilyId.value)
-
       // Check if the response is an error object
       if (childrenResponse && childrenResponse.error) {
         error.value = childrenResponse.message || 'Failed to load children data'
         return
       }
-
       // Calculate today's feedings for each child
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-
       const feedingStats = []
-
       for (const child of childrenResponse) {
         const colorTheme = getChildColorTheme(child.id)
-
         // Fetch feeds for the child
         const feeds = await feedsService.findAll(child.id)
-        
         // Sort feeds by occurredAt in descending order
         const sortedFeeds = feeds && feeds.length > 0 
           ? [...feeds].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))
           : []
-          
         // Count today's feedings
         const todayFeedings = sortedFeeds.filter(feed => new Date(feed.occurredAt) >= today).length
-
         // Add to feeding stats
         feedingStats.push({
           name: child.firstName,
@@ -167,7 +142,6 @@ const fetchFeedingData = async () => {
           colorClass: colorTheme === 'primary' ? 'bg-primary' : 'bg-secondary'
         })
       }
-
       feedingData.value = feedingStats
     } catch (err) {
       console.error('Error fetching feeding data:', err)
@@ -177,7 +151,6 @@ const fetchFeedingData = async () => {
     }
   }
 }
-
 onMounted(async () => {
   await fetchFeedingData()
 })

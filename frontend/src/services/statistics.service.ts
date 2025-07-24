@@ -1,6 +1,5 @@
 import api from './api';
 import type { IStatisticsService } from '@/interfaces';
-
 class StatisticsService implements IStatisticsService {
   /**
    * Get family statistics
@@ -11,12 +10,10 @@ class StatisticsService implements IStatisticsService {
       return response;
     } catch (error) {
       console.error('Error fetching family statistics:', error);
-      
       // If the error already has the error property, return it as is
       if (error && typeof error === 'object' && 'error' in error) {
         return error;
       }
-      
       // Return an error object that the component can handle
       return {
         error: true,
@@ -24,7 +21,6 @@ class StatisticsService implements IStatisticsService {
       };
     }
   }
-
   /**
    * Get child statistics
    */
@@ -34,12 +30,10 @@ class StatisticsService implements IStatisticsService {
       return response;
     } catch (error) {
       console.error('Error fetching child statistics:', error);
-      
       // If the error already has the error property, return it as is
       if (error && typeof error === 'object' && 'error' in error) {
         return error;
       }
-      
       // Return an error object that the component can handle
       return {
         error: true,
@@ -48,5 +42,4 @@ class StatisticsService implements IStatisticsService {
     }
   }
 }
-
 export default new StatisticsService();

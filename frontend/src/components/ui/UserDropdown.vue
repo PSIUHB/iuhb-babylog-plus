@@ -17,21 +17,17 @@
 		</ul>
 	</div>
 </template>
-
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { computed } from 'vue'
 import Avatar from '@/components/ui/Avatar.vue'
-
 const router = useRouter()
 const authStore = useAuthStore()
 const user = computed(() => authStore.getUser)
-
 const handleLogout = () => {
 	// Use the auth store to logout
 	authStore.logout()
-	console.log('Logging out...')
 	router.push('/auth/login')
 }
 </script>

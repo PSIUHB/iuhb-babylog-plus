@@ -1,15 +1,12 @@
 <template>
 	<h3 class="card-title mb-6">Account Settings</h3>
-
 	<!-- Loading indicator -->
 	<div v-if="loading" class="flex justify-center my-4">
 		<span class="loading loading-spinner loading-md text-primary"></span>
 	</div>
-
 	<!-- Account Status -->
 	<div class="space-y-4 mb-6">
 		<h4 class="text-lg font-semibold">Status</h4>
-
 		<div class="grid grid-cols-1">
 			<div class="flex items-center justify-between p-4 bg-success/10 rounded-lg">
 				<div class="flex items-center gap-3">
@@ -24,11 +21,9 @@
 			</div>
 		</div>
 	</div>
-
 	<!-- Subscription Information -->
 	<div class="space-y-4 mb-6">
 		<h4 class="text-lg font-semibold">Subscription</h4>
-
 		<div class="card bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
 			<div class="card-body">
 				<div class="flex justify-between items-start">
@@ -42,19 +37,16 @@
 					</div>
 					<button class="btn btn-primary btn-sm">Manage Plan</button>
 				</div>
-
 				<div class="mt-4 text-sm text-base-content/60">
 					<p>{{ accountSettings.subscription.features.join(", ") }}</p>
 				</div>
 			</div>
 		</div>
 	</div>
-
 	<!-- Delete Account Confirmation Modal -->
 	<dialog ref="deleteAccountModal" class="modal">
 		<div class="modal-box">
 			<h3 class="font-bold text-lg text-error mb-4">Delete Account</h3>
-
 			<div class="space-y-4">
 				<div class="alert alert-error">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,7 +54,6 @@
 					</svg>
 					<span>This action is permanent and cannot be undone!</span>
 				</div>
-
 				<p class="text-sm">
 					Deleting your account will permanently remove:
 				</p>
@@ -72,14 +63,12 @@
 					<li>Reports and analytics</li>
 					<li>Account preferences and settings</li>
 				</ul>
-
 				<TextInput
 					v-model="deleteConfirmation"
 					label="Type <strong>DELETE</strong> to confirm:"
 					placeholder="DELETE"
 				/>
 			</div>
-
 			<div class="modal-action">
 				<button class="btn btn-ghost" @click="closeDeleteAccountModal">Cancel</button>
 				<button
@@ -96,21 +85,17 @@
 		</form>
 	</dialog>
 </template>
-
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import AuthService from '@/services/auth.service'
 import TextInput from '@/components/ui/TextInput.vue'
-
 const emit = defineEmits(['settings-updated'])
-
 // Refs
 const twoFAModal = ref(null)
 const deleteAccountModal = ref(null)
 const isSaving = ref(false)
 const loading = ref(true)
 const deleteConfirmation = ref('')
-
 // Account settings data with default values
 const accountSettings = reactive({
 	email: '',
@@ -122,17 +107,13 @@ const accountSettings = reactive({
 		features: ['Unlimited babies', 'Analytics', 'Support']
 	}
 })
-
 // Fetch user profile data
 const fetchUserProfile = async () => {
 	loading.value = true
-	
 	try {
 		const profile = await AuthService.getProfile()
-		
 		// Update accountSettings with real user data
 		accountSettings.email = profile.email
-		
 		// Update language if locale is available
 		if (profile.locale) {
 			accountSettings.language = profile.locale
@@ -143,12 +124,10 @@ const fetchUserProfile = async () => {
 		loading.value = false
 	}
 }
-
 // Computed properties
 const storagePercentage = computed(() => {
 	return (accountSettings.storageUsed / accountSettings.storageLimit) * 100
 })
-
 // Methods
 const formatDate = (dateString) => {
 	return new Date(dateString).toLocaleDateString('en-US', {
@@ -157,30 +136,23 @@ const formatDate = (dateString) => {
 		day: 'numeric'
 	})
 }
-
 const saveAccountSettings = async () => {
 	isSaving.value = true
-
 	try {
 		// Prepare data for API
 		const updateData = {
 			locale: accountSettings.language
 		}
-
 		// Save to backend
 		const updatedProfile = await AuthService.updateProfile(updateData)
-
 		// Update local data with response
 		if (updatedProfile) {
 			accountSettings.email = updatedProfile.email
-			
 			if (updatedProfile.locale) {
 				accountSettings.language = updatedProfile.locale
 			}
 		}
-
 		emit('settings-updated', { ...accountSettings })
-		
 		// Show success message using toast
 		const toast = document.createElement('div')
 		toast.className = 'toast toast-top toast-center'
@@ -195,7 +167,6 @@ const saveAccountSettings = async () => {
 		}, 3000)
 	} catch (error) {
 		console.error('Error saving settings:', error)
-		
 		// Show error message
 		const errorMessage = error.response?.data?.message || 'Failed to save settings. Please try again.'
 		const toast = document.createElement('div')
@@ -213,7 +184,6 @@ const saveAccountSettings = async () => {
 		isSaving.value = false
 	}
 }
-
 const resetSettings = () => {
 	// Reset to default values
 	accountSettings.theme = 'baby-light'
@@ -225,41 +195,30 @@ const resetSettings = () => {
 	accountSettings.syncData = true
 	accountSettings.offlineMode = false
 }
-
 const exportData = () => {
-	console.log('Exporting user data...')
 	// Implement data export
 }
-
 const downloadBackup = () => {
-	console.log('Downloading backup...')
 	// Implement backup download
 }
-
 const open2FAModal = () => {
 	twoFAModal.value?.showModal()
 }
-
 const close2FAModal = () => {
 	twoFAModal.value?.close()
 }
-
 const openDeleteAccountModal = () => {
 	deleteConfirmation.value = ''
 	deleteAccountModal.value?.showModal()
 }
-
 const closeDeleteAccountModal = () => {
 	deleteAccountModal.value?.close()
 	deleteConfirmation.value = ''
 }
-
 const confirmDeleteAccount = () => {
-	console.log('Account deletion confirmed')
 	// Implement account deletion
 	closeDeleteAccountModal()
 }
-
 // Initialize component
 onMounted(async () => {
 	await fetchUserProfile()

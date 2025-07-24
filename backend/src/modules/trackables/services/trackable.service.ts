@@ -77,6 +77,7 @@ export abstract class TrackableService<T extends Trackable, CreateDto, UpdateDto
     }
 
     async update(id: string, updateDto: UpdateDto, user: User): Promise<T> {
+
         const trackable = await this.findOne(id, user);
         
         // Get the child with family info

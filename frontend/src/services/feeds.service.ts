@@ -6,7 +6,6 @@ import type {
   FeedUpdateDto,
   IFeedsService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing feeds
  */
@@ -14,7 +13,6 @@ class FeedsService extends TrackableService<Feed, FeedCreateDto, FeedUpdateDto> 
   constructor() {
     super('feeds');
   }
-
   /**
    * Get statistics for feeds
    */
@@ -22,5 +20,4 @@ class FeedsService extends TrackableService<Feed, FeedCreateDto, FeedUpdateDto> 
     return api.get(`/feeds/statistics/child/${childId}`);
   }
 }
-
 export default new FeedsService();

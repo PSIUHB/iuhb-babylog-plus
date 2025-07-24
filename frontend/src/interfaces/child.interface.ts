@@ -3,7 +3,6 @@ export enum Gender {
   FEMALE = 'female',
   OTHER = 'other'
 }
-
 export interface Child {
   id: string;
   familyId: string;
@@ -19,7 +18,6 @@ export interface Child {
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 export interface ChildCreateDto {
   familyId: string;
   firstName?: string;
@@ -33,7 +31,6 @@ export interface ChildCreateDto {
   birthWeightKg?: number; // Birth weight in kilograms
   birthHeightCm?: number; // Birth height in centimeters
 }
-
 export interface ChildUpdateDto {
   firstName?: string;
   lastName?: string;
@@ -47,12 +44,10 @@ export interface ChildUpdateDto {
   birthWeightKg?: number; // Birth weight in kilograms
   birthHeightCm?: number; // Birth height in centimeters
 }
-
 export enum ChildPermission {
   WRITE = 'write',
   READ = 'view'
 }
-
 export interface UserChildRelation {
   id: string;
   userId: string;

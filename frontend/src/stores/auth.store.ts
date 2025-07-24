@@ -2,20 +2,17 @@ import { defineStore } from 'pinia';
 import authService from '../services/auth.service';
 import type { RegisterRequest, UserProfile } from '@/interfaces';
 import { useFamilyStore } from './family.store';
-
 // Define the LoginRequest interface locally
 interface LoginRequest {
   email: string;
   password: string;
 }
-
 interface AuthState {
   user: UserProfile | null;
   token: string | null;
   loading: boolean;
   error: string | null;
 }
-
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
@@ -23,17 +20,14 @@ export const useAuthStore = defineStore('auth', {
     loading: false,
     error: null,
   }),
-
   getters: {
     isAuthenticated: (state) => !!state.token,
     getUser: (state) => state.user,
   },
-
   actions: {
     async register(userData: RegisterRequest) {
       this.loading = true;
       this.error = null;
-
       try {
         const response = await authService.register(userData);
         this.token = response.accessToken;
@@ -46,11 +40,9 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false;
       }
     },
-
     async login(credentials: LoginRequest) {
       this.loading = true;
       this.error = null;
-
       try {
         const response = await authService.login(credentials);
         this.token = response.accessToken;
@@ -63,22 +55,17 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false;
       }
     },
-
     logout() {
       authService.logout();
       this.token = null;
       this.user = null;
-
       // Reset the family store to prevent redirection loops
       const familyStore = useFamilyStore();
       familyStore.reset();
     },
-
     async fetchUserProfile() {
       if (!this.token) return;
-
       this.loading = true;
-
       try {
         const user = await authService.getProfile();
         this.user = user;
@@ -92,7 +79,6 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false;
       }
     },
-
     // Initialize auth state from localStorage
     init() {
       const token = authService.getToken();

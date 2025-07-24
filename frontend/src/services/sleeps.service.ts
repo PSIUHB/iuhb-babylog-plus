@@ -6,7 +6,6 @@ import type {
   SleepUpdateDto,
   ISleepsService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing sleeps
  */
@@ -14,7 +13,6 @@ class SleepsService extends TrackableService<Sleep, SleepCreateDto, SleepUpdateD
   constructor() {
     super('sleeps');
   }
-
   /**
    * Get statistics for sleeps
    */
@@ -22,5 +20,4 @@ class SleepsService extends TrackableService<Sleep, SleepCreateDto, SleepUpdateD
     return api.get(`/sleeps/statistics/child/${childId}`);
   }
 }
-
 export default new SleepsService();

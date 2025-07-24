@@ -16,12 +16,10 @@
 					<h2 class="text-2xl font-bold text-base-content mb-2">Family Management</h2>
 					<p class="text-base-content/70">Manage your family settings, children, and caregivers</p>
 				</div>
-
 				<!-- Family Statistics -->
 				<div class="mb-6">
 					<FamilyStatistics :family-id="family.id" />
 				</div>
-
 				<!-- Tabs Navigation -->
 				<div role="tablist" class="tabs tabs-boxed bg-base-200 rounded-t-lg mb-6">
 					<a role="tab"
@@ -46,7 +44,6 @@
 						Caregivers Management
 					</a>
 				</div>
-
 				<!-- Tab Content -->
 				<div class="mb-8">
 					<!-- Family Settings Tab -->
@@ -56,7 +53,6 @@
 							@family-updated="handleFamilyUpdate" 
 						/>
 					</div>
-
 					<!-- Children Management Tab -->
 					<div v-if="activeTab === 'children'">
 						<ChildrenManagement
@@ -66,7 +62,6 @@
 							@child-deleted="handleChildDeleted"
 						/>
 					</div>
-
 					<!-- Caregivers Management Tab -->
 					<div v-if="activeTab === 'caregivers'">
 						<CaregiversManagement
@@ -76,13 +71,11 @@
 							@caregiver-removed="handleCaregiverRemoved"
 						/>
 					</div>
-
 				</div>
 			</div>
 		</AppLayout>
 	</div>
 </template>
-
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -94,20 +87,17 @@ import FamilyStatistics from '@/components/family/FamilyStatistics.vue'
 import FamiliesService from '@/services/families.service'
 import ChildrenService from '@/services/children.service'
 import CaregiversService from '@/services/caregivers.service'
-
 const route = useRoute()
 const family = ref({})
 const loading = ref(true)
 const error = ref(null)
 const activeTab = ref('settings') // Default active tab
 const children = ref([])
-
 // Fetch family data on component mount
 onMounted(async () => {
 	try {
 		// Get the family ID from the route or use the first family
 		const familyId = route.params.id
-
 		if (familyId) {
 			// Get specific family
 			const response = await FamiliesService.getFamily(familyId)
@@ -128,7 +118,6 @@ onMounted(async () => {
 		loading.value = false
 	}
 })
-
 // Event handlers for family operations
 const handleFamilyUpdate = async (familyData) => {
 	try {
@@ -138,7 +127,6 @@ const handleFamilyUpdate = async (familyData) => {
 		console.error('Error updating family:', err)
 	}
 }
-
 const handleChildAdded = async (childData) => {
 	try {
 		await ChildrenService.createChild(family.value.id, childData)
@@ -147,7 +135,6 @@ const handleChildAdded = async (childData) => {
 		console.error('Error adding child:', err)
 	}
 }
-
 const handleChildUpdated = async (childData) => {
 	try {
 		await ChildrenService.updateChild(childData.id, childData)
@@ -156,7 +143,6 @@ const handleChildUpdated = async (childData) => {
 		console.error('Error updating child:', err)
 	}
 }
-
 const handleChildDeleted = async (childId) => {
 	try {
 		await ChildrenService.deleteChild(childId)
@@ -165,7 +151,6 @@ const handleChildDeleted = async (childId) => {
 		console.error('Error deleting child:', err)
 	}
 }
-
 const handleCaregiverInvited = async (caregiverData) => {
 	try {
 		await CaregiversService.inviteCaregiver(family.value.id, caregiverData)
@@ -174,7 +159,6 @@ const handleCaregiverInvited = async (caregiverData) => {
 		console.error('Error inviting caregiver:', err)
 	}
 }
-
 const handleCaregiverUpdated = async (caregiverData) => {
 	try {
 		await CaregiversService.updateCaregiver(family.value.id, caregiverData.id, caregiverData)
@@ -183,7 +167,6 @@ const handleCaregiverUpdated = async (caregiverData) => {
 		console.error('Error updating caregiver:', err)
 	}
 }
-
 const handleCaregiverRemoved = async (caregiverId) => {
 	try {
 		await CaregiversService.removeCaregiver(family.value.id, caregiverId)
@@ -192,11 +175,9 @@ const handleCaregiverRemoved = async (caregiverId) => {
 		console.error('Error removing caregiver:', err)
 	}
 }
-
 // Fetch children for the current family
 const fetchChildren = async () => {
 	if (!family.value.id) return
-	
 	try {
 		const response = await ChildrenService.getChildrenByFamily(family.value.id)
 		children.value = response || []
@@ -204,13 +185,10 @@ const fetchChildren = async () => {
 		console.error('Error fetching children:', err)
 	}
 }
-
-
 // Watch for family changes to fetch children
 watch(() => family.value.id, (newFamilyId) => {
 	if (newFamilyId) {
 		fetchChildren()
 	}
 }, { immediate: true })
-
 </script>

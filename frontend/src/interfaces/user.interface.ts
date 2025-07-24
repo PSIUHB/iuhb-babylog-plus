@@ -11,7 +11,6 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 export interface UserCreateDto {
   email: string;
   password: string;
@@ -20,7 +19,6 @@ export interface UserCreateDto {
   locale?: string;
   timezone?: string;
 }
-
 export interface UserUpdateDto {
   firstName?: string;
   lastName?: string;
@@ -28,21 +26,17 @@ export interface UserUpdateDto {
   locale?: string;
   timezone?: string;
 }
-
 export interface UserLoginDto {
   email: string;
   password: string;
 }
-
 export interface UserRegisterDto extends UserCreateDto {
   inviteToken?: string;
 }
-
 export interface UserPasswordResetDto {
   token: string;
   password: string;
 }
-
 export interface UserPasswordChangeDto {
   currentPassword: string;
   newPassword: string;

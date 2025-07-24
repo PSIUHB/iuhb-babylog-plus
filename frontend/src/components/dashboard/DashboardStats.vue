@@ -16,7 +16,6 @@
 			<div v-else class="stat-value text-primary">{{ stats.events }}</div>
 			<div class="stat-desc">{{ stats.eventsDesc }}</div>
 		</div>
-
 		<div class="stat">
 			<div class="stat-figure text-secondary">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -30,7 +29,6 @@
 			<div v-else class="stat-value text-secondary">{{ stats.sleep }}h</div>
 			<div class="stat-desc">{{ stats.sleepDesc }}</div>
 		</div>
-
 		<div class="stat">
 			<div class="stat-figure text-accent">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,7 +44,6 @@
 		</div>
 	</div>
 </template>
-
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import childrenService from '@/services/children.service'
@@ -58,7 +55,7 @@ import temperaturesService from '@/services/temperatures.service'
 import weightsService from '@/services/weights.service'
 import { TrackableType } from '@/enums/trackable-type.enum'
 import { useAutoUpdate } from '@/composables/useAutoUpdate'
-
+import { parseDate, getDateDifference } from '@/utils/timeUtils'
 const stats = ref({
 	events: 0,
 	eventsDesc: 'Loading...',
@@ -67,57 +64,45 @@ const stats = ref({
 	caregivers: 0,
 	caregiversDesc: 'Loading...'
 })
-
 const loading = ref(false)
 const error = ref(null)
 const familyStore = useFamilyStore()
-
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
 const connectedCaregivers = computed(() => familyStore.connectedCaregivers || [])
 const currentFamily = computed(() => familyStore.currentFamily)
-
 // Calculate active caregivers from connected users
 const activeCaregivers = computed(() => {
   if (!currentFamily.value?.userFamilies) return 0
-
   return currentFamily.value.userFamilies
     .filter(uf => !uf.leftAt) // Only active members
     .filter(uf => connectedCaregivers.value.includes(uf.userId)) // Only connected users
     .length
 })
-
 // Setup automatic updates via WebSocket
 const { isUpdating: isAutoUpdating } = useAutoUpdate({
   familyId: computed(() => currentFamilyId.value),
   refreshFn: async () => {
-    console.log('Dashboard stats data changed via WebSocket, refreshing...')
     await fetchStats()
   }
 })
-
 // Fetch dashboard stats
 const fetchStats = async () => {
   if (!currentFamilyId.value) {
     await familyStore.fetchFamilies()
   }
-
   if (currentFamilyId.value) {
     loading.value = true
     error.value = null
-
     try {
       // Fetch children for the current family
       const childrenResponse = await childrenService.getChildrenByFamily(currentFamilyId.value)
-
       // Check if the response is an error object
       if (childrenResponse && childrenResponse.error) {
         error.value = childrenResponse.message || 'Failed to load children data'
         return
       }
-
       // Initialize array to hold all trackable items
       const allTrackables = []
-      
       // Process each child
       for (const child of childrenResponse) {
         // Fetch feeds for the child
@@ -136,7 +121,6 @@ const fetchStats = async () => {
             })
           })
         }
-        
         // Fetch sleeps for the child
         const sleeps = await sleepsService.findAll(child.id)
         if (sleeps && sleeps.error) {
@@ -146,14 +130,17 @@ const fetchStats = async () => {
             allTrackables.push({
               childId: child.id,
               type: TrackableType.SLEEP,
-              data: sleep.data,
               occurredAt: sleep.occurredAt,
               createdAt: sleep.createdAt || sleep.occurredAt,
-              createdBy: sleep.createdByUserId
+              createdBy: sleep.createdByUserId,
+              // Sleep-specific properties are now direct properties
+              startTime: sleep.startTime,
+              endTime: sleep.endTime,
+              quality: sleep.quality,
+              sleepType: sleep.sleepType
             })
           })
         }
-        
         // Fetch diapers for the child
         const diapers = await diapersService.findAll(child.id)
         if (diapers && diapers.error) {
@@ -170,7 +157,6 @@ const fetchStats = async () => {
             })
           })
         }
-        
         // Fetch temperatures for the child
         const temperatures = await temperaturesService.findAll(child.id)
         if (temperatures && temperatures.error) {
@@ -187,7 +173,6 @@ const fetchStats = async () => {
             })
           })
         }
-        
         // Fetch weights for the child
         const weights = await weightsService.findAll(child.id)
         if (weights && weights.error) {
@@ -205,54 +190,67 @@ const fetchStats = async () => {
           })
         }
       }
-
-      // Calculate today's events
+      // Calculate today's events using parseDate for consistent timezone handling
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const todayEvents = allTrackables.filter(item => new Date(item.createdAt) >= today)
-
-      // Calculate yesterday's events for comparison
+      const todayEvents = allTrackables.filter(item => {
+        const itemDate = parseDate(item.createdAt)
+        return itemDate && itemDate >= today
+      })
+      // Calculate yesterday's events for comparison using parseDate for consistent timezone handling
       const yesterday = new Date(today)
       yesterday.setDate(yesterday.getDate() - 1)
       const yesterdayEnd = new Date(today)
-      const yesterdayEvents = allTrackables.filter(item => 
-        new Date(item.createdAt) >= yesterday && 
-        new Date(item.createdAt) < yesterdayEnd
-      )
-
+      const yesterdayEvents = allTrackables.filter(item => {
+        const itemDate = parseDate(item.createdAt)
+        return itemDate && itemDate >= yesterday && itemDate < yesterdayEnd
+      })
       // Calculate sleep hours
       let totalSleepMinutes = 0
-
       // For each child, find sleep cycles
       childrenResponse.forEach(child => {
+        // Filter sleep trackables for this child
         const childSleeps = allTrackables.filter(item => 
           item.type === TrackableType.SLEEP && 
           item.childId === child.id
-        ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-
-        // Calculate completed sleep cycles
-        for (let i = 0; i < childSleeps.length - 1; i++) {
-          const current = childSleeps[i]
-          const next = childSleeps[i + 1]
-
-          if (current.data && next.data && current.data.status === 'end' && next.data.status === 'start') {
-            const sleepDuration = new Date(current.occurredAt) - new Date(next.occurredAt)
-            totalSleepMinutes += sleepDuration / (1000 * 60)
+        )
+        // Filter for today's sleep records
+        const todaySleeps = childSleeps.filter(item => {
+          const itemDate = parseDate(item.occurredAt)
+          return itemDate && itemDate >= today
+        }).sort((a, b) => {
+          const dateA = parseDate(a.occurredAt)
+          const dateB = parseDate(b.occurredAt)
+          return dateB.getTime() - dateA.getTime()
+        })
+        // Calculate sleep duration for completed sleep cycles (with both startTime and endTime)
+        for (const sleep of todaySleeps) {
+          if (sleep.startTime && sleep.endTime) {
+            // Calculate duration between startTime and endTime
+            const sleepMinutes = getDateDifference(sleep.startTime, sleep.endTime, 'minutes')
+            if (sleepMinutes !== null && sleepMinutes > 0) {
+              totalSleepMinutes += sleepMinutes
+            }
           }
         }
-
-        // Check if child is currently sleeping
-        if (childSleeps.length > 0 && childSleeps[0].data && childSleeps[0].data.status === 'start') {
-          const sleepStart = new Date(childSleeps[0].occurredAt)
+        // Check if child is currently sleeping (has startTime but no endTime)
+        const currentlySleeping = todaySleeps.find(sleep => 
+          sleep.startTime && !sleep.endTime
+        )
+        if (currentlySleeping) {
+          const sleepStart = parseDate(currentlySleeping.startTime)
           const now = new Date()
-          const currentSleepDuration = (now - sleepStart) / (1000 * 60)
-          totalSleepMinutes += currentSleepDuration
+          if (sleepStart) {
+            // Calculate minutes from sleep start until now
+            const currentSleepMinutes = getDateDifference(sleepStart, now, 'minutes')
+            if (currentSleepMinutes !== null && currentSleepMinutes > 0) {
+              totalSleepMinutes += currentSleepMinutes
+            }
+          }
         }
       })
-
       // Count unique caregivers (users who created events)
       const uniqueCaregivers = new Set(allTrackables.map(item => item.createdBy))
-
       // Use connected caregivers from WebSocket instead of event creators
       stats.value = {
         events: todayEvents.length,
@@ -274,22 +272,8 @@ const fetchStats = async () => {
     }
   }
 }
-
-// Use mock data when API fails
-const useMockData = () => {
-  stats.value = {
-    events: 24,
-    eventsDesc: '↗︎ 3 more than yesterday',
-    sleep: 15.2,
-    sleepDesc: 'Combined for both babies',
-    caregivers: 3,
-    caregiversDesc: 'Currently active'
-  }
-}
-
 // Watch for changes in connected caregivers and update stats accordingly
 watch(connectedCaregivers, (newConnectedCaregivers, oldConnectedCaregivers) => {
-
   // Update only the caregivers stat without refetching all data
   if (stats.value.caregivers !== undefined) {
     const newCount = activeCaregivers.value;
@@ -297,7 +281,6 @@ watch(connectedCaregivers, (newConnectedCaregivers, oldConnectedCaregivers) => {
     stats.value.caregiversDesc = newCount === 1 ? 'Currently online' : 'Currently online';
   }
 }, { deep: true })
-
 // Also watch for changes in currentFamily to ensure we have the latest user data
 watch(currentFamily, (newFamily, oldFamily) => {
   if (newFamily && stats.value.caregivers !== undefined) {
@@ -306,7 +289,6 @@ watch(currentFamily, (newFamily, oldFamily) => {
     stats.value.caregiversDesc = newCount === 1 ? 'Currently online' : 'Currently online';
   }
 }, { deep: true })
-
 onMounted(async () => {
   await fetchStats()
 })

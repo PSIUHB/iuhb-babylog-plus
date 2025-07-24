@@ -1,7 +1,6 @@
 <template>
   <fieldset class="fieldset">
     <legend v-if="label" class="fieldset-legend">{{ label }}{{ required ? ' *' : '' }}</legend>
-    
     <select
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
@@ -22,16 +21,13 @@
         </option>
       </slot>
     </select>
-    
     <!-- Optional label -->
     <span v-if="optionalText" class="label">{{ optionalText }}</span>
-    
     <!-- Error or help text -->
     <p v-if="error" class="label-text-alt text-error mt-1">{{ error }}</p>
     <p v-else-if="helpText" class="label text-sm">{{ helpText }}</p>
   </fieldset>
 </template>
-
 <script setup>
 defineProps({
   modelValue: {
@@ -71,6 +67,5 @@ defineProps({
     default: false
   }
 });
-
 defineEmits(['update:modelValue']);
 </script>

@@ -13,7 +13,6 @@
 					{{ action.icon }} {{ action.label }}
 				</button>
 			</div>
-
 			<!-- Baby Selection Modal (when multiple babies) -->
 			<dialog
 				ref="babySelectionModal"
@@ -23,7 +22,6 @@
 				<div class="modal-box">
 					<h3 class="font-bold text-lg mb-4">Select Baby</h3>
 					<p class="mb-4">Which baby is this for?</p>
-
 					<div class="space-y-3">
 						<button
 							v-for="baby in babies"
@@ -41,7 +39,6 @@
 							{{ baby.name }}
 						</button>
 					</div>
-
 					<div class="modal-action">
 						<button class="btn btn-ghost" @click="closeBabySelection">Cancel</button>
 					</div>
@@ -53,18 +50,14 @@
 		</div>
 	</div>
 </template>
-
 <script setup>
 import { ref } from 'vue'
-
 // Emits for parent component communication
 const emit = defineEmits(['action-selected'])
-
 // Reactive data
 const babySelectionModal = ref(null)
 const showBabySelection = ref(false)
 const selectedAction = ref(null)
-
 const actions = ref([
 	{
 		id: 1,
@@ -123,7 +116,6 @@ const actions = ref([
 		requiresBabySelection: false
 	}
 ])
-
 const babies = ref([
 	{
 		id: 1,
@@ -138,11 +130,9 @@ const babies = ref([
 		colorTheme: 'secondary'
 	}
 ])
-
 // Methods
 const handleAction = (action) => {
 	selectedAction.value = action
-
 	if (action.requiresBabySelection && babies.value.length > 1) {
 		showBabySelection.value = true
 		babySelectionModal.value?.showModal()
@@ -152,41 +142,33 @@ const handleAction = (action) => {
 		executeAction(action, baby)
 	}
 }
-
 const selectBaby = (baby) => {
 	executeAction(selectedAction.value, baby)
 	closeBabySelection()
 }
-
 const executeAction = (action, baby) => {
-	console.log(`Quick action: ${action.action} for ${baby?.name || 'unknown baby'}`)
-
 	// Emit event to parent component
 	emit('action-selected', {
 		action: action.action,
 		baby: baby,
 		timestamp: new Date()
 	})
-
 	// Here you would typically:
 	// 1. Call an API service
 	// 2. Update a store
 	// 3. Navigate to a specific form
 	// 4. Show a success message
 }
-
 const closeBabySelection = () => {
 	showBabySelection.value = false
 	selectedAction.value = null
 	babySelectionModal.value?.close()
 }
 </script>
-
 <style scoped>
 .btn:hover {
 	transform: translateY(-1px);
 }
-
 .btn:active {
 	transform: translateY(0);
 }

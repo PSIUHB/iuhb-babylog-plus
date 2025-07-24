@@ -7,19 +7,15 @@
 				</svg>
 			</label>
 		</div>
-
 		<div class="flex-1">
 			<img class="lg:hidden babylog-logo" src="./../../assets/images/logo/babylogplus.png" alt="BabyLog+ Logo">
 		</div>
-
 		<div class="flex-none flex items-center gap-2">
-
 			<!-- User Menu -->
 			<UserDropdown />
 		</div>
 	</div>
 </template>
-
 <script setup>
 import UserDropdown from '../ui/UserDropdown.vue'
 </script>

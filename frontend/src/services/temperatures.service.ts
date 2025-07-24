@@ -6,7 +6,6 @@ import type {
   TemperatureUpdateDto,
   ITemperaturesService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing temperatures
  */
@@ -14,7 +13,6 @@ class TemperaturesService extends TrackableService<Temperature, TemperatureCreat
   constructor() {
     super('temperatures');
   }
-
   /**
    * Get statistics for temperatures
    */
@@ -22,5 +20,4 @@ class TemperaturesService extends TrackableService<Temperature, TemperatureCreat
     return api.get(`/temperatures/statistics/child/${childId}`);
   }
 }
-
 export default new TemperaturesService();

@@ -4,7 +4,6 @@
 		<SleepPatternsChart />
 	</div>
 </template>
-
 <script setup>
 import FeedingScheduleChart from '../statistics/FeedingScheduleChart.vue'
 import SleepPatternsChart from '../statistics/SleepPatternsChart.vue'

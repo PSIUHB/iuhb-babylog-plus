@@ -11,14 +11,12 @@ export interface Invitation {
   expiresAt: Date;
   acceptedAt?: Date;
 }
-
 export interface InvitationCreateDto {
   email: string;
   role?: string;
   message?: string;
   familyId: string;
 }
-
 export interface InvitationResponseDto {
   id: string;
   email: string;

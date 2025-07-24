@@ -6,19 +6,15 @@
 			<div class="flex items-center gap-3 mb-8">
 				<img class="hidden lg:block babylog-logo" src="./../../assets/images/logo/babylogplus.png" alt="BabyLog+ Logo">
 			</div>
-
 			<!-- Navigation Menu -->
 			<SidebarNavigation />
-
 			<!-- Spacer to push caregivers to bottom -->
 			<div class="flex-grow"></div>
-
 			<!-- Caregivers Section at bottom -->
 			<ActiveCaregivers />
 		</aside>
 	</div>
 </template>
-
 <script setup>
 import SidebarNavigation from './SidebarNavigation.vue'
 import ActiveCaregivers from '../family/ActiveCaregivers.vue'

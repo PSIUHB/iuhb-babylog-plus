@@ -6,7 +6,6 @@ export enum MilestoneCategory {
   SELF_CARE = 'selfCare',
   PHYSICAL_GROWTH = 'physicalGrowth'
 }
-
 export interface Milestone {
   category: MilestoneCategory;
   milestone: string;
@@ -14,7 +13,6 @@ export interface Milestone {
   ageRangeMonths: [number, number]; // [min, max]
   achievedDate?: string; // ISO date string
 }
-
 // Predefined milestones by category
 export const MILESTONES: Record<MilestoneCategory, Milestone[]> = {
   [MilestoneCategory.MOTOR_DEVELOPMENT]: [

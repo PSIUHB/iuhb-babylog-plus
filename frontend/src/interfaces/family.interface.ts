@@ -6,16 +6,13 @@ export interface Family {
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 export interface FamilyCreateDto {
   name: string;
 }
-
 export interface FamilyUpdateDto {
   name?: string;
   settings?: Record<string, any>;
 }
-
 export interface FamilyWithMembersDto extends Family {
   userFamilies?: Array<{
     userId: string;

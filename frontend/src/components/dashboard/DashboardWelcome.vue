@@ -15,55 +15,45 @@
 		</p>
 	</div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useFamilyStore } from '@/stores/family.store'
 import childrenService from '@/services/children.service'
-
 const authStore = useAuthStore()
 const familyStore = useFamilyStore()
 const loading = ref(false)
 const error = ref(null)
 const babyNames = ref([])
-
 // Get user's first name from auth store
 const userName = computed(() => {
 	const user = authStore.getUser
 	return user ? user.firstName : 'User'
 })
-
 // Get current family ID from family store
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
-
 const joinBabyNames = computed(() => {
 	const names = babyNames.value;
 	if (names.length === 0) return '';
 	if (names.length === 1) return names[0];
 	return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
 });
-
 // Fetch children data
 const fetchChildrenData = async () => {
 	if (!currentFamilyId.value) {
 		await familyStore.fetchFamilies()
 	}
-
 	if (currentFamilyId.value) {
 		loading.value = true
 		error.value = null
-
 		try {
 			// Fetch children for the current family
 			const childrenResponse = await childrenService.getChildrenByFamily(currentFamilyId.value)
-
 			// Check if the response is an error object
 			if (childrenResponse && childrenResponse.error) {
 				error.value = childrenResponse.message || 'Failed to load children data'
 				return
 			}
-
 			// Extract children names
 			babyNames.value = childrenResponse.map(child => child.firstName)
 		} catch (err) {
@@ -74,7 +64,6 @@ const fetchChildrenData = async () => {
 		}
 	}
 }
-
 onMounted(async () => {
 	await fetchChildrenData()
 })

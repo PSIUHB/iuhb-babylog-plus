@@ -8,18 +8,15 @@
 			Invite Caregiver
 		</button>
 	</div>
-
 	<!-- Loading State -->
 	<div v-if="loading" class="flex justify-center py-8">
 		<div class="loading loading-spinner loading-md text-primary"></div>
 	</div>
-
 	<!-- Error State -->
 	<div v-else-if="error" class="alert alert-error">
 		<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 		<span>{{ error }}</span>
 	</div>
-
 	<!-- Empty State -->
 	<div v-else-if="caregivers.length === 0" class="text-center py-8">
 		<div class="text-base-content/50 mb-4">
@@ -36,7 +33,6 @@
 			Invite Your First Caregiver
 		</button>
 	</div>
-
 	<!-- Caregivers List -->
 	<div v-else class="space-y-4">
 		<div
@@ -50,7 +46,6 @@
 					:name="`${caregiver.firstName} ${caregiver.lastName}`"
 					size="lg"
 				/>
-
 				<!-- Caregiver Information -->
 				<div class="flex-1">
 					<div class="flex items-center gap-2 mb-1">
@@ -69,9 +64,7 @@
 						<p><strong>Last Active:</strong> {{ formatLastActive(caregiver.lastActive) }}</p>
 					</div>
 				</div>
-
 				<!-- Permissions section removed as permissions are now determined by role -->
-
 				<!-- Action Buttons -->
 				<div class="flex gap-2">
 					<button
@@ -106,12 +99,10 @@
 			</div>
 		</div>
 	</div>
-
 	<!-- Invite Caregiver Modal -->
 	<dialog ref="inviteModal" class="modal">
 		<div class="modal-box w-11/12 max-w-2xl">
 			<h3 class="font-bold text-lg mb-4">Invite New Caregiver</h3>
-
 			<form @submit.prevent="sendInvitation" class="space-y-4">
 				<!-- Basic Information -->
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,7 +113,6 @@
 						:error="inviteErrors.firstName"
 						required
 					/>
-
 					<TextInput
 						v-model="inviteForm.lastName"
 						label="Last Name *"
@@ -131,7 +121,6 @@
 						required
 					/>
 				</div>
-
 				<TextInput
 					v-model="inviteForm.email"
 					type="email"
@@ -140,7 +129,6 @@
 					:error="inviteErrors.email"
 					required
 				/>
-
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<TextInput
 						v-model="inviteForm.phone"
@@ -148,16 +136,13 @@
 						label="Phone Number"
 						placeholder="+49 123 456 7890"
 					/>
-
 					<SelectInput
 						v-model="inviteForm.role"
 						label="Role"
 						:options="roleOptions"
 					/>
 				</div>
-
 				<!-- Permissions section removed as permissions are now determined by role -->
-
 				<!-- Personal Message -->
 				<TextInput
 					v-model="inviteForm.message"
@@ -168,7 +153,6 @@
 					:rows="5"
 					showCharCount
 				/>
-
 				<!-- Modal Actions -->
 				<div class="modal-action">
 					<button
@@ -194,12 +178,10 @@
 			<button @click="closeInviteModal">close</button>
 		</form>
 	</dialog>
-
 	<!-- Edit Caregiver Modal -->
 	<dialog ref="editModal" class="modal">
 		<div class="modal-box w-11/12 max-w-2xl">
 			<h3 class="font-bold text-lg mb-4">Edit Caregiver</h3>
-
 			<form @submit.prevent="updateCaregiver" class="space-y-4">
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<TextInput
@@ -207,28 +189,23 @@
 						label="First Name *"
 						required
 					/>
-
 					<TextInput
 						v-model="editForm.lastName"
 						label="Last Name *"
 						required
 					/>
 				</div>
-
 				<SelectInput
 					v-model="editForm.role"
 					label="Role"
 					:options="roleOptions"
 				/>
-
 				<TextInput
 					v-model="editForm.phone"
 					type="tel"
 					label="Phone Number"
 				/>
-
 				<!-- Permissions section removed as permissions are now determined by role -->
-
 				<!-- Modal Actions -->
 				<div class="modal-action">
 					<button
@@ -254,7 +231,6 @@
 			<button @click="closeEditModal">close</button>
 		</form>
 	</dialog>
-
 	<!-- Remove Confirmation Modal -->
 	<dialog ref="removeModal" class="modal">
 		<div class="modal-box">
@@ -265,7 +241,6 @@
 			<p class="text-sm text-base-content/70 mb-6">
 				They will lose access to all family data and will need to be re-invited if you want to add them back.
 			</p>
-
 			<div class="modal-action">
 				<button
 					class="btn btn-ghost"
@@ -289,7 +264,6 @@
 		</form>
 	</dialog>
 </template>
-
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import CaregiversService from '@/services/caregivers.service'
@@ -298,16 +272,13 @@ import Avatar from '@/components/ui/Avatar.vue'
 import { usePermissions, Permission } from '@/services/permissions.service'
 import TextInput from '@/components/ui/TextInput.vue'
 import SelectInput from '@/components/ui/SelectInput.vue'
-
 const props = defineProps({
 	familyId: {
 		type: String,
 		required: true
 	}
 })
-
 const emit = defineEmits(['caregiver-invited', 'caregiver-updated', 'caregiver-removed'])
-
 // Refs
 const inviteModal = ref(null)
 const editModal = ref(null)
@@ -319,27 +290,21 @@ const caregiverToRemove = ref(null)
 const inviteErrors = ref({})
 const loading = ref(false)
 const error = ref(null)
-
 // Get permissions
 const { hasPermission, permissions } = usePermissions()
-
 // Get auth store to check current user
 import { useAuthStore } from '@/stores/auth.store'
 import { useFamilyStore } from '@/stores/family.store'
 import { computed } from 'vue'
-
 const authStore = useAuthStore()
 const familyStore = useFamilyStore()
-
 // Add computed properties to check if the current user has specific permissions
 const canManageFamily = computed(() => {
   return hasPermission(Permission.MANAGE_FAMILY);
 });
-
 const canInviteCaregivers = computed(() => {
   return hasPermission(Permission.INVITE_CAREGIVERS);
 });
-
 // Forms
 const inviteForm = reactive({
 	firstName: '',
@@ -349,7 +314,6 @@ const inviteForm = reactive({
 	role: 'caregiver',
 	message: ''
 })
-
 const editForm = reactive({
 	id: null,
 	firstName: '',
@@ -357,29 +321,22 @@ const editForm = reactive({
 	phone: '',
 	role: 'caregiver'
 })
-
 // Permissions are now determined by role, so we don't need to define available permissions
-
 // Options for select inputs
 const roleOptions = [
   { value: 'parent', label: 'Parent' },
   { value: 'caregiver', label: 'Caregiver' },
   { value: 'viewer', label: 'Viewer Only' }
 ]
-
 // Caregivers data
 const caregivers = ref([])
-
 // Fetch caregivers from API
 const fetchCaregivers = async () => {
 	if (!props.familyId) return
-
 	loading.value = true
 	error.value = null
-
 	try {
 		const response = await CaregiversService.getCaregiversByFamily(props.familyId)
-		
 		// Check if the response is an error object
 		if (response && response.error === true) {
 			console.error('Error fetching caregivers:', response.message)
@@ -394,14 +351,12 @@ const fetchCaregivers = async () => {
 		loading.value = false
 	}
 }
-
 // Fetch caregivers when familyId changes
 watch(() => props.familyId, (newFamilyId) => {
 	if (newFamilyId) {
 		fetchCaregivers()
 	}
 }, { immediate: true })
-
 const getRoleLabel = (role) => {
 	const labels = {
 		owner: 'Family Owner',
@@ -411,27 +366,19 @@ const getRoleLabel = (role) => {
 	}
 	return labels[role] || role
 }
-
 // getPermissionLabel function removed as permissions are now determined by role
-
 const formatLastActive = (lastActive) => {
 	if (!lastActive) return 'Never logged in'
-
 	const now = new Date()
 	const last = new Date(lastActive)
 	const diffMinutes = Math.floor((now - last) / (1000 * 60))
-
 	if (diffMinutes < 1) return 'Active now'
 	if (diffMinutes < 60) return `${diffMinutes} min ago`
-
 	const diffHours = Math.floor(diffMinutes / 60)
 	if (diffHours < 24) return `${diffHours}h ago`
-
 	const diffDays = Math.floor(diffHours / 24)
 	return `${diffDays}d ago`
 }
-
-
 const openInviteModal = () => {
 	if (!canInviteCaregivers.value) {
 		alert('You do not have permission to invite caregivers')
@@ -440,7 +387,6 @@ const openInviteModal = () => {
 	resetInviteForm()
 	inviteModal.value?.showModal()
 }
-
 const editCaregiver = (caregiver) => {
 	if (!canManageFamily.value) {
 		alert('You do not have permission to edit caregivers')
@@ -453,40 +399,31 @@ const editCaregiver = (caregiver) => {
 	editForm.role = caregiver.role
 	editModal.value?.showModal()
 }
-
 const validateInviteForm = () => {
 	inviteErrors.value = {}
 	let isValid = true
-
 	if (!inviteForm.firstName || inviteForm.firstName.trim().length < 2) {
 		inviteErrors.value.firstName = 'First name must be at least 2 characters'
 		isValid = false
 	}
-
 	if (!inviteForm.lastName || inviteForm.lastName.trim().length < 2) {
 		inviteErrors.value.lastName = 'Last name must be at least 2 characters'
 		isValid = false
 	}
-
 	if (!inviteForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.email)) {
 		inviteErrors.value.email = 'Please enter a valid email address'
 		isValid = false
 	}
-
 	// Check if email already exists
 	if (caregivers.value.some(c => c.email === inviteForm.email)) {
 		inviteErrors.value.email = 'This email is already associated with a caregiver'
 		isValid = false
 	}
-
 	return isValid
 }
-
 const sendInvitation = async () => {
 	if (!validateInviteForm()) return
-
 	isSendingInvite.value = true
-
 	try {
 		// Only send the fields expected by the backend
 		const inviteData = {
@@ -494,15 +431,11 @@ const sendInvitation = async () => {
 			role: inviteForm.role,
 			message: inviteForm.message
 		}
-		
 		const response = await CaregiversService.inviteCaregiver(props.familyId, inviteData)
-
 		// Refresh caregivers list
 		await fetchCaregivers()
-
 		emit('caregiver-invited', response)
 		closeInviteModal()
-
 		// Show success message
 		alert('Invitation sent successfully!')
 	} catch (error) {
@@ -512,10 +445,8 @@ const sendInvitation = async () => {
 		isSendingInvite.value = false
 	}
 }
-
 const updateCaregiver = async () => {
 	isUpdating.value = true
-
 	try {
 		const caregiverData = {
 			id: editForm.id,
@@ -524,15 +455,11 @@ const updateCaregiver = async () => {
 			phone: editForm.phone,
 			role: editForm.role
 		}
-
 		const response = await CaregiversService.updateCaregiver(props.familyId, editForm.id, caregiverData)
-
 		// Refresh caregivers list
 		await fetchCaregivers()
-
 		emit('caregiver-updated', response)
 		closeEditModal()
-
 		// Show success message
 		alert('Caregiver updated successfully!')
 	} catch (error) {
@@ -542,7 +469,6 @@ const updateCaregiver = async () => {
 		isUpdating.value = false
 	}
 }
-
 const removeCaregiver = (caregiver) => {
 	if (!canManageFamily.value) {
 		alert('You do not have permission to remove caregivers')
@@ -551,21 +477,15 @@ const removeCaregiver = (caregiver) => {
 	caregiverToRemove.value = caregiver
 	removeModal.value?.showModal()
 }
-
 const confirmRemove = async () => {
 	if (!caregiverToRemove.value) return
-
 	isRemoving.value = true
-
 	try {
 		await CaregiversService.removeCaregiver(props.familyId, caregiverToRemove.value.id)
-
 		// Refresh caregivers list
 		await fetchCaregivers()
-
 		emit('caregiver-removed', caregiverToRemove.value.id)
 		closeRemoveModal()
-
 		// Show success message
 		alert('Caregiver removed successfully!')
 	} catch (error) {
@@ -575,16 +495,13 @@ const confirmRemove = async () => {
 		isRemoving.value = false
 	}
 }
-
 const resendInvitation = async (caregiver) => {
 	if (!canInviteCaregivers.value) {
 		alert('You do not have permission to resend invitations')
 		return
 	}
-	
 	try {
 		await CaregiversService.resendInvitation(props.familyId, caregiver.email)
-
 		// Show success message
 		alert('Invitation resent successfully!')
 	} catch (error) {
@@ -592,7 +509,6 @@ const resendInvitation = async (caregiver) => {
 		alert('Error resending invitation. Please try again.')
 	}
 }
-
 const resetInviteForm = () => {
 	inviteForm.firstName = ''
 	inviteForm.lastName = ''
@@ -602,16 +518,13 @@ const resetInviteForm = () => {
 	inviteForm.message = ''
 	inviteErrors.value = {}
 }
-
 const closeInviteModal = () => {
 	inviteModal.value?.close()
 	resetInviteForm()
 }
-
 const closeEditModal = () => {
 	editModal.value?.close()
 }
-
 const closeRemoveModal = () => {
 	removeModal.value?.close()
 	caregiverToRemove.value = null

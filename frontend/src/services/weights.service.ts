@@ -6,7 +6,6 @@ import type {
   WeightUpdateDto,
   IWeightsService
 } from '@/interfaces/trackable.interface';
-
 /**
  * Service for managing weights
  */
@@ -14,7 +13,6 @@ class WeightsService extends TrackableService<Weight, WeightCreateDto, WeightUpd
   constructor() {
     super('weights');
   }
-
   /**
    * Get statistics for weights
    */
@@ -22,5 +20,4 @@ class WeightsService extends TrackableService<Weight, WeightCreateDto, WeightUpd
     return api.get(`/weights/statistics/child/${childId}`);
   }
 }
-
 export default new WeightsService();

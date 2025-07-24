@@ -9,7 +9,6 @@ import AppPage from '../views/AppPage.vue';
 import FamilyPage from "../views/FamilyPage.vue";
 import ProfilePage from "../views/ProfilePage.vue";
 import { useFamilyStore } from '../stores/family.store';
-
 const routes = [
   {
     path: '/',
@@ -62,12 +61,10 @@ const routes = [
     redirect: '/'
   }
 ];
-
 const router = createRouter({
   history: createWebHistory(),
   routes
 });
-
 // Add navigation guards to protect routes that require authentication
 router.beforeEach((to, _from, next) => {
   // Routes that require authentication
@@ -77,7 +74,6 @@ router.beforeEach((to, _from, next) => {
       // Redirect to login page if not authenticated
       return next('/auth/login');
     } 
-
     // If trying to access app routes, check if user has a family
     if (to.path.startsWith('/app')) {
       // Check authentication status first before checking families
@@ -85,9 +81,7 @@ router.beforeEach((to, _from, next) => {
       if (!authToken) {
         return next('/auth/login');
       }
-
       const familyStore = useFamilyStore();
-
       // If families are already loaded, check if user has a family
       if (familyStore.families.length) {
         if (!familyStore.currentFamily) {
@@ -114,7 +108,6 @@ router.beforeEach((to, _from, next) => {
         }
         return next();
       }
-
       // If families aren't loaded yet, fetch them
       familyStore.fetchFamilies()
         .then(() => {
@@ -153,13 +146,10 @@ router.beforeEach((to, _from, next) => {
         });
       return;
     }
-
     // For non-app authenticated routes (like create-family)
     return next();
   }
-
   // For public routes
   return next();
 });
-
 export default router;

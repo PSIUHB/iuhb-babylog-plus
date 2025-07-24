@@ -1,4 +1,4 @@
-import { IsString, IsDate, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsDate, IsOptional, IsArray, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -22,4 +22,9 @@ export class UpdateTrackableDto {
         type: string;
         name: string;
     }>;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsUUID()
+    childId?: string;
 }

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import authService from '@/services/auth.service';
-
 const firstName = ref('');
 const lastName = ref('');
 const email = ref('');
@@ -10,28 +9,23 @@ const confirmPassword = ref('');
 const errorMessage = ref('');
 const successMessage = ref('');
 const isLoading = ref(false);
-
 const register = async () => {
   try {
     // Reset messages
     errorMessage.value = '';
     successMessage.value = '';
-
     // Validate passwords match
     if (password.value !== confirmPassword.value) {
       errorMessage.value = 'Passwords do not match';
       return;
     }
-
     // Validate password length
     if (password.value.length < 6) {
       errorMessage.value = 'Password must be at least 6 characters long';
       return;
     }
-
     // Set loading state
     isLoading.value = true;
-
     // Call the auth service to register the user
     await authService.register({
       firstName: firstName.value,
@@ -39,14 +33,12 @@ const register = async () => {
       email: email.value,
       password: password.value
     });
-
     // Clear form
     firstName.value = '';
     lastName.value = '';
     email.value = '';
     password.value = '';
     confirmPassword.value = '';
-
     // Show success message
     successMessage.value = 'Registration successful! Please check your email for an activation link.';
   } catch (error) {
@@ -58,7 +50,6 @@ const register = async () => {
   }
 };
 </script>
-
 <template>
   <div class="register-page">
     <h1>Register</h1>
@@ -138,7 +129,6 @@ const register = async () => {
     </div>
   </div>
 </template>
-
 <style scoped>
 .register-page {
   display: flex;
@@ -148,12 +138,10 @@ const register = async () => {
   min-height: 100vh;
   padding: 2rem;
 }
-
 h1 {
   font-size: 2rem;
   margin-bottom: 1.5rem;
 }
-
 .error-message {
   width: 100%;
   max-width: 400px;
@@ -165,7 +153,6 @@ h1 {
   border-radius: 4px;
   text-align: center;
 }
-
 .success-message {
   width: 100%;
   max-width: 400px;
@@ -177,7 +164,6 @@ h1 {
   border-radius: 4px;
   text-align: center;
 }
-
 .register-form {
   width: 100%;
   max-width: 400px;
@@ -185,24 +171,20 @@ h1 {
   flex-direction: column;
   gap: 1rem;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 input {
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
 input:disabled {
   background-color: #f3f4f6;
   cursor: not-allowed;
 }
-
 button {
   margin-top: 1rem;
   padding: 0.75rem;
@@ -214,26 +196,21 @@ button {
   font-weight: 500;
   transition: background-color 0.2s;
 }
-
 button:hover:not(:disabled) {
   background-color: #4338ca;
 }
-
 button:disabled {
   background-color: #a5b4fc;
   cursor: not-allowed;
 }
-
 .links {
   margin-top: 2rem;
   text-align: center;
 }
-
 .links a {
   color: #4f46e5;
   text-decoration: underline;
 }
-
 .password-hint {
   font-size: 0.8rem;
   color: #6b7280;

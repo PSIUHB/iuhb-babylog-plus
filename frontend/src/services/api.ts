@@ -1,8 +1,6 @@
 // API client using fetch instead of axios
-
 // Base API configuration
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
-
 // Helper function to handle HTTP errors
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
@@ -12,7 +10,6 @@ const handleResponse = async (response: Response) => {
       localStorage.removeItem('token');
       // Don't redirect here - throw an error instead
     }
-
     // Try to parse error message from response
     let errorMessage;
     try {
@@ -21,42 +18,33 @@ const handleResponse = async (response: Response) => {
     } catch (e) {
       errorMessage = response.status === 500 ? 'Internal server error' : 'An error occurred';
     }
-
     // For 500 errors, log them silently without throwing
     if (response.status === 500) {
       console.warn(`API Error (${response.status}): ${errorMessage}`);
       return { error: true, message: errorMessage, status: response.status };
     }
-
     throw new Error(errorMessage);
   }
-
   // For empty responses (like 204 No Content)
   if (response.status === 204) {
     return null;
   }
-
   // Parse JSON response
   return response.json();
 };
-
 // Create default headers
 const getHeaders = () => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
-
   // Add authorization header if token exists
   const token = localStorage.getItem('token');
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-
   return headers;
 };
-
 import type { IApi } from '@/interfaces';
-
 // API client methods
 const api: IApi = {
   /**
@@ -74,7 +62,6 @@ const api: IApi = {
       return { error: true, message: 'Network error occurred', status: 0 };
     }
   },
-
   /**
    * POST request
    */
@@ -91,7 +78,6 @@ const api: IApi = {
       return { error: true, message: 'Network error occurred', status: 0 };
     }
   },
-
   /**
    * PUT request
    */
@@ -108,7 +94,6 @@ const api: IApi = {
       return { error: true, message: 'Network error occurred', status: 0 };
     }
   },
-
   /**
    * PATCH request
    */
@@ -125,7 +110,6 @@ const api: IApi = {
       return { error: true, message: 'Network error occurred', status: 0 };
     }
   },
-
   /**
    * DELETE request
    */
@@ -142,5 +126,4 @@ const api: IApi = {
     }
   }
 };
-
 export default api;

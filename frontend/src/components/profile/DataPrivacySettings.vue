@@ -2,11 +2,9 @@
 	<div class="card bg-base-100 shadow-lg">
 		<div class="card-body">
 			<h3 class="card-title mb-6">Data & Privacy Settings</h3>
-
 			<!-- Data Collection Preferences -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Data Collection</h4>
-
 				<div class="space-y-4">
 					<label class="label cursor-pointer">
 						<div>
@@ -19,7 +17,6 @@
 							class="checkbox checkbox-primary"
 						/>
 					</label>
-
 					<label class="label cursor-pointer">
 						<div>
 							<span class="label-text font-semibold">Crash Reports</span>
@@ -31,7 +28,6 @@
 							class="checkbox checkbox-primary"
 						/>
 					</label>
-
 					<label class="label cursor-pointer">
 						<div>
 							<span class="label-text font-semibold">Research Participation</span>
@@ -43,7 +39,6 @@
 							class="checkbox checkbox-primary"
 						/>
 					</label>
-
 					<label class="label cursor-pointer">
 						<div>
 							<span class="label-text font-semibold">Personalized Recommendations</span>
@@ -57,11 +52,9 @@
 					</label>
 				</div>
 			</div>
-
 			<!-- Data Visibility -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Data Visibility</h4>
-
 				<div class="space-y-4">
 					<label class="label cursor-pointer">
 						<div>
@@ -74,7 +67,6 @@
 							class="checkbox checkbox-primary"
 						/>
 					</label>
-
 					<label class="label cursor-pointer">
 						<div>
 							<span class="label-text font-semibold">Profile Visibility</span>
@@ -86,7 +78,6 @@
 							class="checkbox checkbox-primary"
 						/>
 					</label>
-
 					<label class="label cursor-pointer">
 						<div>
 							<span class="label-text font-semibold">Activity Status</span>
@@ -100,11 +91,9 @@
 					</label>
 				</div>
 			</div>
-
 			<!-- Data Retention -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Data Retention</h4>
-
 				<div class="space-y-4">
 					<SelectInput
 						v-model="privacySettings.activityLogRetention"
@@ -112,7 +101,6 @@
 						:options="activityLogRetentionOptions"
 						helpText="How long to keep detailed activity logs"
 					/>
-
 					<SelectInput
 						v-model="privacySettings.photoRetention"
 						label="Auto-delete old photos after:"
@@ -121,11 +109,9 @@
 					/>
 				</div>
 			</div>
-
 			<!-- Data Export & Download -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Your Data</h4>
-
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div class="card bg-base-200 border border-base-300">
 						<div class="card-body">
@@ -142,7 +128,6 @@
 							</button>
 						</div>
 					</div>
-
 					<div class="card bg-base-200 border border-base-300">
 						<div class="card-body">
 							<h5 class="font-bold">Generate Report</h5>
@@ -160,11 +145,9 @@
 					</div>
 				</div>
 			</div>
-
 			<!-- Third-Party Integrations -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Third-Party Integrations</h4>
-
 				<div class="space-y-4">
 					<div
 						v-for="integration in integrations"
@@ -199,11 +182,9 @@
 					</div>
 				</div>
 			</div>
-
 			<!-- Data Requests -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Data Requests</h4>
-
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<button
 						class="btn btn-outline"
@@ -214,7 +195,6 @@
 						</svg>
 						Request Data Copy
 					</button>
-
 					<button
 						class="btn btn-outline"
 						@click="requestDataCorrection"
@@ -224,7 +204,6 @@
 						</svg>
 						Request Correction
 					</button>
-
 					<button
 						class="btn btn-outline btn-error"
 						@click="requestDataDeletion"
@@ -235,7 +214,6 @@
 						Request Deletion
 					</button>
 				</div>
-
 				<div class="text-sm text-base-content/60">
 					<p>Under GDPR and other privacy laws, you have the right to:</p>
 					<ul class="list-disc list-inside mt-2 space-y-1">
@@ -246,28 +224,23 @@
 					</ul>
 				</div>
 			</div>
-
 			<!-- Privacy Information -->
 			<div class="space-y-6 mb-8">
 				<h4 class="text-lg font-semibold">Privacy Information</h4>
-
 				<div class="space-y-3">
 					<div class="flex justify-between items-center p-3 bg-base-200 rounded-lg">
 						<span class="text-sm">Data stored since:</span>
 						<span class="text-sm font-semibold">{{ formatDate(privacyInfo.dataStoredSince) }}</span>
 					</div>
-
 					<div class="flex justify-between items-center p-3 bg-base-200 rounded-lg">
 						<span class="text-sm">Last privacy policy update:</span>
 						<span class="text-sm font-semibold">{{ formatDate(privacyInfo.lastPolicyUpdate) }}</span>
 					</div>
-
 					<div class="flex justify-between items-center p-3 bg-base-200 rounded-lg">
 						<span class="text-sm">Data processing purpose:</span>
 						<span class="text-sm font-semibold">{{ privacyInfo.processingPurpose }}</span>
 					</div>
 				</div>
-
 				<div class="flex gap-2">
 					<a href="/privacy-policy" target="_blank" class="btn btn-ghost btn-sm">
 						Privacy Policy
@@ -280,7 +253,6 @@
 					</a>
 				</div>
 			</div>
-
 			<!-- Save Settings -->
 			<div class="card-actions justify-end pt-6 border-t border-base-300">
 				<button
@@ -295,13 +267,10 @@
 		</div>
 	</div>
 </template>
-
 <script setup>
 import { ref, reactive } from 'vue'
 import SelectInput from '@/components/ui/SelectInput.vue'
-
 const emit = defineEmits(['privacy-updated'])
-
 // Options for select inputs
 const activityLogRetentionOptions = [
   { value: '30', label: '30 days' },
@@ -310,7 +279,6 @@ const activityLogRetentionOptions = [
   { value: '365', label: '1 year' },
   { value: 'forever', label: 'Forever' }
 ]
-
 const photoRetentionOptions = [
   { value: 'never', label: 'Never delete' },
   { value: '365', label: '1 year' },
@@ -318,12 +286,10 @@ const photoRetentionOptions = [
   { value: '1095', label: '3 years' },
   { value: '1825', label: '5 years' }
 ]
-
 // Reactive data
 const isSaving = ref(false)
 const isExporting = ref(false)
 const isGeneratingReport = ref(false)
-
 // Privacy settings
 const privacySettings = reactive({
 	allowAnalytics: true,
@@ -336,7 +302,6 @@ const privacySettings = reactive({
 	activityLogRetention: '365',
 	photoRetention: 'never'
 })
-
 // Third-party integrations
 const integrations = ref([
 	{
@@ -361,14 +326,12 @@ const integrations = ref([
 		connected: false
 	}
 ])
-
 // Privacy information
 const privacyInfo = ref({
 	dataStoredSince: '2024-01-15',
 	lastPolicyUpdate: '2024-05-01',
 	processingPurpose: 'Baby care tracking and family coordination'
 })
-
 // Methods
 const formatDate = (dateString) => {
 	return new Date(dateString).toLocaleDateString('en-US', {
@@ -377,28 +340,21 @@ const formatDate = (dateString) => {
 		day: 'numeric'
 	})
 }
-
 const savePrivacySettings = async () => {
 	isSaving.value = true
-
 	try {
 		await new Promise(resolve => setTimeout(resolve, 1000))
-
 		emit('privacy-updated', { ...privacySettings })
-		console.log('Privacy settings saved successfully!')
 	} catch (error) {
 		console.error('Error saving privacy settings:', error)
 	} finally {
 		isSaving.value = false
 	}
 }
-
 const exportAllData = async () => {
 	isExporting.value = true
-
 	try {
 		await new Promise(resolve => setTimeout(resolve, 2000))
-
 		// Simulate creating and downloading a file
 		const data = {
 			exportDate: new Date().toISOString(),
@@ -409,10 +365,8 @@ const exportAllData = async () => {
 			},
 			// ... more data
 		}
-
 		const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
 		const url = URL.createObjectURL(blob)
-
 		const a = document.createElement('a')
 		a.href = url
 		a.download = `babylog-data-export-${new Date().toISOString().split('T')[0]}.json`
@@ -420,22 +374,16 @@ const exportAllData = async () => {
 		a.click()
 		document.body.removeChild(a)
 		URL.revokeObjectURL(url)
-
-		console.log('Data export completed')
 	} catch (error) {
 		console.error('Error exporting data:', error)
 	} finally {
 		isExporting.value = false
 	}
 }
-
 const generateReport = async () => {
 	isGeneratingReport.value = true
-
 	try {
 		await new Promise(resolve => setTimeout(resolve, 3000))
-
-		console.log('PDF report generated')
 		alert('Report generated successfully! Check your downloads folder.')
 	} catch (error) {
 		console.error('Error generating report:', error)
@@ -443,24 +391,16 @@ const generateReport = async () => {
 		isGeneratingReport.value = false
 	}
 }
-
 const toggleIntegration = (integration) => {
 	integration.connected = !integration.connected
-	console.log(`${integration.name} ${integration.connected ? 'connected' : 'disconnected'}`)
 }
-
 const requestDataCopy = () => {
-	console.log('Data copy request submitted')
 	alert('Your request has been submitted. You will receive a copy of your data within 30 days.')
 }
-
 const requestDataCorrection = () => {
-	console.log('Data correction request submitted')
 	alert('Your correction request has been submitted. We will review and update your data within 7 days.')
 }
-
 const requestDataDeletion = () => {
-	console.log('Data deletion request submitted')
 	alert('Your deletion request has been submitted. Please note that this will permanently remove all your data.')
 }
 </script>

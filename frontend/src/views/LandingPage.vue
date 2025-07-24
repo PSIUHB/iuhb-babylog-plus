@@ -20,7 +20,6 @@
 				</router-link>
 			</div>
 		</div>
-
 		<!-- Hero Section -->
 		<div class="hero bg-gradient-to-br from-accent/5 to-primary/5 min-h-[85vh]">
 			<div class="hero-content flex-col lg:flex-row-reverse max-w-6xl mx-auto px-4">
@@ -35,7 +34,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="flex-1 text-center lg:text-left">
 					<h1 class="text-4xl lg:text-6xl font-bold text-base-content">
 						Take care of your
@@ -57,7 +55,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Features Section -->
 		<div id="features" class="py-20 bg-gradient-to-br from-secondary/5 to-accent/5">
 			<div class="max-w-6xl mx-auto px-4">
@@ -69,7 +66,6 @@
 						Every feature is designed with the unique challenges of caring for one or even more babies in mind.
 					</p>
 				</div>
-
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					<div
 						v-for="(feature, index) in features"
@@ -85,7 +81,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- How It Works Section -->
 		<div class="py-20 bg-base-100">
 			<div class="max-w-6xl mx-auto px-4">
@@ -97,7 +92,6 @@
 						Get started in minutes with our intuitive setup process
 					</p>
 				</div>
-
 				<ul class="steps steps-vertical lg:steps-horizontal w-full">
 					<li
 						v-for="(step, index) in steps"
@@ -113,7 +107,6 @@
 				</ul>
 			</div>
 		</div>
-
 		<!-- Testimonials Section -->
 		<div id="testimonials" class="py-20 bg-gradient-to-br from-accent/5 to-primary/5">
 			<div class="max-w-6xl mx-auto px-4">
@@ -125,7 +118,6 @@
 						See what other parents and caretaker are thinking about BabyLog+
 					</p>
 				</div>
-
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					<div
 						v-for="(testimonial, index) in testimonials"
@@ -159,7 +151,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Pricing Section -->
 		<div id="pricing" class="py-20 bg-base-100">
 			<div class="max-w-4xl mx-auto px-4">
@@ -171,7 +162,6 @@
 						Choose the plan that works best for you and your family
 					</p>
 				</div>
-
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
 					<div class="card bg-base-100 shadow-lg border border-base-300">
 						<div class="card-body">
@@ -206,7 +196,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div class="card bg-base-100 shadow-xl border-2 border-primary relative">
 						<div class="badge badge-primary absolute -top-3 left-1/2 transform -translate-x-1/2">
 							Most Popular
@@ -252,7 +241,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- CTA Section -->
 		<div class="py-20 bg-gradient-to-r from-primary to-secondary text-primary-content">
 			<div class="max-w-4xl mx-auto px-4 text-center">
@@ -269,7 +257,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Footer -->
 		<footer class="footer footer-center bg-base-200 text-base-content p-10">
 			<aside>
@@ -297,28 +284,22 @@
 		</footer>
 	</div>
 </template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-
 const babyTypes = ['Baby', 'Twins', 'Triplets', 'Quadruplets']
 const currentIndex = ref(0)
 let intervalId = null
-
 const cycleText = () => {
 	currentIndex.value = (currentIndex.value + 1) % babyTypes.length
 }
-
 onMounted(() => {
 	intervalId = setInterval(cycleText, 1500)
 })
-
 onUnmounted(() => {
 	if (intervalId) {
 		clearInterval(intervalId)
 	}
 })
-
 const features = [
 	{
 		icon: '👶',
@@ -351,7 +332,6 @@ const features = [
 		description: 'Works perfectly on any device - no app store needed'
 	}
 ]
-
 const steps = [
 	{
 		title: 'Create Your Family',
@@ -370,7 +350,6 @@ const steps = [
 		description: 'View insights and export data for pediatrician visits'
 	}
 ]
-
 const testimonials = [
 	{
 		name: 'Sarah & Michael',
@@ -392,6 +371,5 @@ const testimonials = [
 	}
 ]
 </script>
-
 <style>
 </style>

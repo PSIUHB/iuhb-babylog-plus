@@ -3,7 +3,6 @@ import type { Caregiver, CaregiverInviteDto, CaregiverUpdateDto } from './caregi
 import type { Family, FamilyCreateDto, FamilyUpdateDto, FamilyWithMembersDto } from './family.interface';
 import type { InvitationCreateDto } from './invitation.interface';
 import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile, UpdateUserDto } from './auth.interface';
-
 /**
  * Interface for the API service
  */
@@ -14,7 +13,6 @@ export interface IApi {
   patch(endpoint: string, data?: any): Promise<any>;
   delete(endpoint: string): Promise<any>;
 }
-
 /**
  * Interface for the Auth service
  */
@@ -30,7 +28,6 @@ export interface IAuthService {
   activateAccount(token: string): Promise<any>;
   getPendingInvitations(): Promise<any[]>;
 }
-
 /**
  * Interface for the Children service
  */
@@ -42,7 +39,6 @@ export interface IChildrenService {
   deleteChild(childId: string): Promise<void>;
   uploadAvatar(childId: string, file: File): Promise<Child>;
 }
-
 /**
  * Interface for the Caregivers service
  */
@@ -53,7 +49,6 @@ export interface ICaregiversService {
   removeCaregiver(familyId: string, userId: string): Promise<any>;
   resendInvitation(familyId: string, email: string): Promise<any>;
 }
-
 /**
  * Interface for the Families service
  */
@@ -66,7 +61,6 @@ export interface IFamiliesService {
   joinFamily(code: string): Promise<any>;
   acceptInvitation(invitationId: string): Promise<any>;
 }
-
 /**
  * Interface for the Statistics service
  */

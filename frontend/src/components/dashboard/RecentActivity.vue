@@ -31,7 +31,6 @@
 		</div>
 	</div>
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import childrenService from '@/services/children.service'
@@ -43,15 +42,12 @@ import temperaturesService from '@/services/temperatures.service'
 import weightsService from '@/services/weights.service'
 import milestoneService from '@/services/milestones.service'
 import { useAutoUpdate } from '@/composables/useAutoUpdate'
-
 const activities = ref([])
 const loading = ref(false)
 const error = ref(null)
 const familyStore = useFamilyStore()
 const childrenMap = ref({})
-
 const currentFamilyId = computed(() => familyStore.getCurrentFamilyId)
-
 // Setup automatic updates via WebSocket
 const { isUpdating: isAutoUpdating } = useAutoUpdate({
   familyId: computed(() => currentFamilyId.value),
@@ -59,7 +55,6 @@ const { isUpdating: isAutoUpdating } = useAutoUpdate({
     await fetchActivities()
   }
 })
-
 // Format time ago
 const formatTimeAgo = (timestamp) => {
   const now = new Date()
@@ -67,7 +62,6 @@ const formatTimeAgo = (timestamp) => {
   const diffMs = now - date
   const diffMins = Math.round(diffMs / (1000 * 60))
   const diffHours = Math.round(diffMs / (1000 * 60 * 60))
-
   if (diffMins < 60) {
     return `${diffMins}m ago`
   } else if (diffHours < 24) {
@@ -76,73 +70,54 @@ const formatTimeAgo = (timestamp) => {
     return `${Math.floor(diffHours / 24)}d ago`
   }
 }
-
 import { TrackableType } from '@/enums/trackable-type.enum'
-
 // Format event action
 const formatEventAction = (event) => {
   // Extract data from event - ensure we have a data object even if it's undefined
   const data = event.data || {};
-
   switch (event.type) {
     case TrackableType.FEEDING:
       return `Fed ${data.method ? ' - ' + data.method : ''} ${data.amount_ml ? `(${data.amount_ml}ml)` : ''}`
-    
     case TrackableType.SLEEP:
       return data.status === 'start' 
         ? 'Started sleeping' 
         : `Woke up ${data.duration_minutes ? `after ${data.duration_minutes} minutes` : 'from nap'}`
-    
     case TrackableType.DIAPER:
       return `Diaper changed ${data.type ? ' - ' + data.type : ''}`
-    
     case TrackableType.TEMPERATURE:
       return `Temperature recorded: ${data.value || ''}${data.unit === 'fahrenheit' ? '°F' : '°C'}`
-    
     case TrackableType.MEDICINE:
       return `Medicine given: ${data.name || ''} (${data.dosage || ''} ${data.unit || ''})`
-    
     case TrackableType.WEIGHT:
       return `Weight recorded: ${data.value || ''}${data.unit ? ` ${data.unit}` : 'kg'}`
-    
     case TrackableType.HEIGHT:
       return `Height recorded: ${data.value || ''}${data.unit ? ` ${data.unit}` : 'cm'}`
-    
     case TrackableType.ACTIVITY:
       return `${data.name || 'Activity'} ${data.duration_minutes ? `for ${data.duration_minutes} minutes` : 'completed'}`
-    
     case TrackableType.NOTE:
       return `Note: ${data.title || data.content?.substring(0, 20) || 'Added'}`
-    
     case TrackableType.MILESTONE:
       return `Milestone achieved: ${data.milestone || ''}`
-    
     default:
       return event.type.replace('_', ' ')
   }
 }
-
-
 // Fetch recent activities
 const fetchActivities = async () => {
   if (!currentFamilyId.value) {
     await familyStore.fetchFamilies()
   }
-
   if (currentFamilyId.value) {
     loading.value = true
     error.value = null
-
     try {
       // Fetch children for the current family
       const childrenResponse = await childrenService.getChildrenByFamily(currentFamilyId.value)
-
       // Check if the response is an error object
       if (childrenResponse && childrenResponse.error) {
         error.value = childrenResponse.message || 'Failed to load children data'
         return
       }
-
       // Create a map of child IDs to names
       childrenMap.value = childrenResponse.reduce((map, child) => {
         map[child.id] = {
@@ -152,10 +127,8 @@ const fetchActivities = async () => {
         }
         return map
       }, {})
-
       // Initialize array to hold all activities
       const allActivities = []
-
       // Process each child
       for (const child of childrenResponse) {
         // Fetch feeds for the child
@@ -171,7 +144,6 @@ const fetchActivities = async () => {
             })
           })
         }
-        
         // Fetch sleeps for the child
         const sleeps = await sleepsService.findAll(child.id)
         if (sleeps && sleeps.length > 0) {
@@ -185,7 +157,6 @@ const fetchActivities = async () => {
             })
           })
         }
-        
         // Fetch diapers for the child
         const diapers = await diapersService.findAll(child.id)
         if (diapers && diapers.length > 0) {
@@ -199,7 +170,6 @@ const fetchActivities = async () => {
             })
           })
         }
-        
         // Fetch temperatures for the child
         const temperatures = await temperaturesService.findAll(child.id)
         if (temperatures && temperatures.length > 0) {
@@ -213,7 +183,6 @@ const fetchActivities = async () => {
             })
           })
         }
-        
         // Fetch weights for the child
         const weights = await weightsService.findAll(child.id)
         if (weights && weights.length > 0) {
@@ -227,7 +196,6 @@ const fetchActivities = async () => {
             })
           })
         }
-        
         // Fetch milestones for the child
         try {
           const milestones = await milestoneService.getMilestones(child.id)
@@ -246,18 +214,14 @@ const fetchActivities = async () => {
           // Continue with other activities even if milestones fail
         }
       }
-
       // Sort all activities by createdAt in descending order
       allActivities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      
       // Take only the 10 most recent activities
       const recentActivities = allActivities.slice(0, 10)
-
       // Format the activities for display
       activities.value = recentActivities.map(activity => {
         const child = childrenMap.value[activity.childId]
         const colorTheme = child?.gender === 'female' ? 'primary' : 'secondary'
-
         return {
           baby: child?.name || 'Unknown',
           initial: child?.initial || '?',
@@ -276,27 +240,22 @@ const fetchActivities = async () => {
     }
   }
 }
-
 onMounted(async () => {
   await fetchActivities()
 })
 </script>
-
 <style scoped>
 /* Custom scrollbar for activity feed */
 .overflow-y-auto::-webkit-scrollbar {
 	width: 4px;
 }
-
 .overflow-y-auto::-webkit-scrollbar-track {
 	background: transparent;
 }
-
 .overflow-y-auto::-webkit-scrollbar-thumb {
 	background: hsl(var(--bc) / 0.2);
 	border-radius: 2px;
 }
-
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
 	background: hsl(var(--bc) / 0.3);
 }

@@ -1,7 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { Sleep, SleepStatus } from '../entities/sleep.entity';
+import { Sleep, SleepType, FallAsleepMethod, WakeUpBehavior, WakeUpReason } from '../entities/sleep.entity';
 import { TrackableService } from './trackable.service';
 import { CreateSleepDto } from '../dto/create-sleep.dto';
 import { UpdateSleepDto } from '../dto/update-sleep.dto';
@@ -51,30 +51,31 @@ export class SleepsService extends TrackableService<Sleep, CreateSleepDto, Updat
         return {
             last24h: {
                 count: this.countCompleteSleepCycles(last24hSleeps),
-                totalDuration: this.calculateTotalDuration(last24hSleeps),
-                averageDuration: this.calculateAverageDuration(last24hSleeps),
-                qualityBreakdown: this.calculateQualityBreakdown(last24hSleeps)
+                qualityBreakdown: this.calculateQualityBreakdown(last24hSleeps),
+                sleepTypeBreakdown: this.calculateSleepTypeBreakdown(last24hSleeps),
+                fallAsleepMethodBreakdown: this.calculateFallAsleepMethodBreakdown(last24hSleeps),
+                wakeUpBehaviorBreakdown: this.calculateWakeUpBehaviorBreakdown(last24hSleeps),
+                wakeUpReasonBreakdown: this.calculateWakeUpReasonBreakdown(last24hSleeps)
             },
             last7d: {
                 count: this.countCompleteSleepCycles(last7dSleeps),
-                totalDuration: this.calculateTotalDuration(last7dSleeps),
-                averageDuration: this.calculateAverageDuration(last7dSleeps),
-                qualityBreakdown: this.calculateQualityBreakdown(last7dSleeps)
+                qualityBreakdown: this.calculateQualityBreakdown(last7dSleeps),
+                sleepTypeBreakdown: this.calculateSleepTypeBreakdown(last7dSleeps),
+                fallAsleepMethodBreakdown: this.calculateFallAsleepMethodBreakdown(last7dSleeps),
+                wakeUpBehaviorBreakdown: this.calculateWakeUpBehaviorBreakdown(last7dSleeps),
+                wakeUpReasonBreakdown: this.calculateWakeUpReasonBreakdown(last7dSleeps)
             }
         };
     }
 
     private countCompleteSleepCycles(sleeps: Sleep[]): number {
-        // Count pairs of start and end events
+        // Count complete sleep cycles (entries with both startTime and endTime)
         let count = 0;
-        let hasStart = false;
 
         for (const sleep of sleeps) {
-            if (sleep.status === SleepStatus.START) {
-                hasStart = true;
-            } else if (sleep.status === SleepStatus.END && hasStart) {
+            // If this is a single entry with both startTime and endTime
+            if (sleep.startTime && sleep.endTime) {
                 count++;
-                hasStart = false;
             }
         }
 
@@ -82,18 +83,41 @@ export class SleepsService extends TrackableService<Sleep, CreateSleepDto, Updat
     }
 
     private calculateTotalDuration(sleeps: Sleep[]): number {
-        // Sum up duration_minutes for all sleep records with duration
-        return sleeps.reduce((total, sleep) => {
-            return total + (sleep.duration_minutes || 0);
-        }, 0);
+        // Calculate total duration from sleep entries
+        let totalDuration = 0;
+
+        // Process all sleep entries
+        sleeps.forEach(sleep => {
+            // If this is a single entry with both startTime and endTime
+            if (sleep.startTime && sleep.endTime) {
+                const durationMs = new Date(sleep.endTime).getTime() - new Date(sleep.startTime).getTime();
+                const durationMinutes = Math.round(durationMs / (1000 * 60));
+                totalDuration += durationMinutes > 0 ? durationMinutes : 0;
+            }
+        });
+        
+        return totalDuration;
     }
 
     private calculateAverageDuration(sleeps: Sleep[]): number {
-        const sleepsWithDuration = sleeps.filter(s => s.duration_minutes);
-        if (sleepsWithDuration.length === 0) return 0;
+        // Calculate average duration from sleep entries
+        let totalDuration = 0;
+        let count = 0;
+
+        // Process all sleep entries
+        sleeps.forEach(sleep => {
+            // If this is a single entry with both startTime and endTime
+            if (sleep.startTime && sleep.endTime) {
+                const durationMs = new Date(sleep.endTime).getTime() - new Date(sleep.startTime).getTime();
+                const durationMinutes = Math.round(durationMs / (1000 * 60));
+                if (durationMinutes > 0) {
+                    totalDuration += durationMinutes;
+                    count++;
+                }
+            }
+        });
         
-        const total = sleepsWithDuration.reduce((sum, sleep) => sum + sleep.duration_minutes, 0);
-        return Math.round(total / sleepsWithDuration.length);
+        return count > 0 ? Math.round(totalDuration / count) : 0;
     }
 
     private calculateQualityBreakdown(sleeps: Sleep[]): Record<string, number> {
@@ -106,6 +130,77 @@ export class SleepsService extends TrackableService<Sleep, CreateSleepDto, Updat
         sleeps.forEach(sleep => {
             if (sleep.quality) {
                 breakdown[sleep.quality]++;
+            }
+        });
+        
+        return breakdown;
+    }
+
+    private calculateSleepTypeBreakdown(sleeps: Sleep[]): Record<string, number> {
+        const breakdown = {
+            nap: 0,
+            night: 0,
+            other: 0
+        };
+        
+        sleeps.forEach(sleep => {
+            if (sleep.sleepType) {
+                breakdown[sleep.sleepType]++;
+            }
+        });
+        
+        return breakdown;
+    }
+
+    private calculateFallAsleepMethodBreakdown(sleeps: Sleep[]): Record<string, number> {
+        const breakdown = {
+            rocking: 0,
+            nursing: 0,
+            bottle: 0,
+            pacifier: 0,
+            self_soothing: 0,
+            other: 0
+        };
+        
+        sleeps.forEach(sleep => {
+            if (sleep.fallAsleepMethod) {
+                breakdown[sleep.fallAsleepMethod]++;
+            }
+        });
+        
+        return breakdown;
+    }
+
+    private calculateWakeUpBehaviorBreakdown(sleeps: Sleep[]): Record<string, number> {
+        const breakdown = {
+            calm: 0,
+            crying: 0,
+            fussy: 0,
+            happy: 0
+        };
+        
+        sleeps.forEach(sleep => {
+            if (sleep.wakeUpBehavior) {
+                breakdown[sleep.wakeUpBehavior]++;
+            }
+        });
+        
+        return breakdown;
+    }
+
+    private calculateWakeUpReasonBreakdown(sleeps: Sleep[]): Record<string, number> {
+        const breakdown = {
+            natural: 0,
+            noise: 0,
+            hunger: 0,
+            diaper: 0,
+            discomfort: 0,
+            other: 0
+        };
+        
+        sleeps.forEach(sleep => {
+            if (sleep.wakeUpReason) {
+                breakdown[sleep.wakeUpReason]++;
             }
         });
         
